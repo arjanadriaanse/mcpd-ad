@@ -1,6 +1,7 @@
 module PrettyPrint where 
 import Language
 import Algebra
+-- Todo intercalate
 
 instance Show Type where
     show TInt         = "int"
