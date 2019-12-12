@@ -8,19 +8,19 @@ data Type = TInt
 type Identifier = String
 
 data Term = Var Identifier
-          | CReal Double
-          | CInt Int
-          | New Type Term
+          | CReal  Double
+          | CInt   Int
+          | New    Type Term
           | Lookup Term Term
           | Update Term Term Term
           | Length Term
-          | Map Term Term
-          | Fold Term Term Term
-          | Fun Type Type Identifier Term
+          | Map    Term Term
+          | Fold   Term Term Term
+          | Fun    Type Type Identifier Term
           | FunApp Term Term
           -- Operators
-          | Neg Term
+          | Neg     Term
           | Sigmoid Term
-          | Add Term Term
-          | Mult Term Term
-          | InnerProd Term Term
+          | Add     Term Term
+          | Mult    Term Term
+          | Dot     Term Term
