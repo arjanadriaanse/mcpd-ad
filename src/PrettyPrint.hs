@@ -11,7 +11,8 @@ instance Show Type where
 
 instance Show Term where
     show = foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap, 
-        fFold, fFun, fApp, fNeg, fSig, fAdd, fMult, fDot) where
+        fFold, fFun, fApp, fNeg, fSig, fAdd, fMult, fDot,
+        idTypeAlgebra) where
             fVar  = id
             fReal = show 
             fInt  = show
@@ -37,7 +38,6 @@ instance Show Term where
             fMult t1 t2    = t1 ++ "*" ++ t2
             fDot t1 t2     = t1 ++ "@" ++ t2
             
-
 
 example :: Term
 example = Fun TReal TReal "x" (Mult (Var "x") (Var "x"))

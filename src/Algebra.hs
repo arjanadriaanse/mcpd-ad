@@ -38,6 +38,9 @@ type TermAlgebra t tau = (
     TypeAlgebra tau
     )
 
+idTypeAlgebra :: TypeAlgebra Type
+idTypeAlgebra = (TInt, TReal, TPair, TArray, TFun)
+
 foldType :: TypeAlgebra a -> Type -> a
 foldType (fInt, fReal, fPair, fArray, fFun) = fType
   where
