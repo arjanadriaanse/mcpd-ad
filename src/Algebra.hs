@@ -30,7 +30,6 @@ type TermAlgebra t tau = (
     t -> t      -> t, -- Application
 
     -- Operators
-    t      -> t, -- Neg
     t      -> t, -- Sigmoid  
     t -> t -> t, -- Add
     t -> t -> t, -- Mult
@@ -52,7 +51,7 @@ foldType (fInt, fReal, fPair, fArray, fFun) = fType
 
 foldTerm :: TermAlgebra a b -> Term -> a
 foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap, 
-            fFold, fFun, fApp, fNeg, fSig, fAdd, fMult, fDot, aType) = fTerm where
+            fFold, fFun, fApp, fSig, fAdd, fMult, fDot, aType) = fTerm where
     fTerm (Var x)        = fVar x 
     fTerm (CReal n)      = fReal n
     fTerm (CInt n)       = fInt n 
@@ -68,7 +67,6 @@ foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap,
     fTerm (Fun y1 y2 x t)= fFun (fType y1) (fType y2) x (fTerm t)
     fTerm (FunApp t1 t2) = fApp   (fTerm t1) (fTerm t2)
     -- Operators
-    fTerm (Neg t)        = fNeg  (fTerm t)
     fTerm (Sigmoid t)    = fSig  (fTerm t)
     fTerm (Add t1 t2)    = fAdd  (fTerm t1) (fTerm t2)
     fTerm (Mult t1 t2)   = fMult (fTerm t1) (fTerm t2)

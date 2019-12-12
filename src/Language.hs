@@ -23,7 +23,6 @@ data Term = Var Identifier
           | Fun    Type Type Identifier Term
           | FunApp Term Term
           -- Operators
-          | Neg     Term
           | Sigmoid Term
           | Add     Term Term
           | Mult    Term Term

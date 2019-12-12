@@ -11,7 +11,7 @@ instance Show Type where
 
 instance Show Term where
     show = foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap, 
-        fFold, fFun, fApp, fNeg, fSig, fAdd, fMult, fDot,
+        fFold, fFun, fApp, fSig, fAdd, fMult, fDot,
         idTypeAlgebra) where
             fVar  = id
             fReal = show 
@@ -32,7 +32,6 @@ instance Show Term where
             fApp t1 t2     = t1 ++ " " ++ t2
             
             -- Operators
-            fNeg t         = "-" ++ t
             fSig t         = "sigmoid(" ++ t ++ ")"
             fAdd t1 t2     = t1 ++ "+" ++ t2
             fMult t1 t2    = t1 ++ "*" ++ t2

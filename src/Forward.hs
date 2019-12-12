@@ -6,7 +6,7 @@ import Algebra
 differentiate :: Term -> Term
 differentiate = foldTerm
   (Var, fReal, CInt, Pair, Case, New, Lookup, Update, Length,
-   Map, Fold, Fun, FunApp, Neg, fSigmoid, fAdd, fMult, Dot,
+   Map, Fold, Fun, FunApp, fSigmoid, fAdd, fMult, Dot,
    (TInt, fTReal, TPair, TArray, TFun)) where
   fTReal = TPair TReal TReal
   fReal n = Pair (CReal n) (CReal 0)
@@ -19,6 +19,7 @@ differentiate = foldTerm
                                  (Var "x'" `Mult` Var "y"))))
   fSigmoid t = Case t "x" "x'"
                (Fun TReal (TPair TReal TReal) "y"
-                (Pair (Var "y") (Var "x'" `Mult` Var "y" `Mult`
-                                 (CReal 1 `Add` Neg (Var "y"))))
+                (Pair (Var "y")
+                 (Var "x'" `Mult` Var "y" `Mult`
+                  (CReal 1 `Add` (CReal (-1) `Mult` Var "y"))))
                 `FunApp` Sigmoid (Var "x"))
