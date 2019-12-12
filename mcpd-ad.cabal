@@ -26,7 +26,8 @@ library
 
 executable mcpd-ad
   main-is:             Main.hs
-  other-modules:       Language
+  other-modules:       Language,
+                       Algebra
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
   hs-source-dirs:      src
