@@ -6,6 +6,12 @@ type TermAlgebra t = (
     Identifier  -> t, -- This is the Var
     Double      -> t, -- CReal
     Int         -> t, -- CInt
+
+    -- Pair and case
+    t -> t -> t, -- Pair
+    t -> Identifier -> Identifier -> t -> t,
+
+    -- Fuck it
     Type -> t   -> t, -- New
     t -> t      -> t, -- Lookup
     t -> t -> t -> t, -- Update
@@ -20,16 +26,19 @@ type TermAlgebra t = (
     t      -> t, -- Sigmoid  
     t -> t -> t, -- Add
     t -> t -> t, -- Mult
-    t -> t -> t  -- Dot product
+    t -> t -> t -- Dot product
     )
 
 
 foldTerm :: TermAlgebra a -> Term -> a
-foldTerm (fVar, fReal, fInt, fNew, fLook, fUp, fLen, fMap, 
+foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap, 
             fFold, fFun, fApp, fNeg, fSig, fAdd, fMult, fDot) = fTerm where
     fTerm (Var x)        = fVar x 
     fTerm (CReal n)      = fReal n
     fTerm (CInt n)       = fInt n 
+    -- Pair Case
+    fTerm (Pair t1 t2)       = fPair (fTerm t1) (fTerm t2)
+    fTerm (Case t1 x1 x2 t2) = fCase (fTerm t1) x1 x2 (fTerm t2)
     fTerm (New y t)      = fNew y (fTerm t)
     fTerm (Lookup t1 t2) = fLook  (fTerm t1) (fTerm t2)
     fTerm (Update t1 t2 t3) = fUp (fTerm t1) (fTerm t2) (fTerm t3)
@@ -44,6 +53,7 @@ foldTerm (fVar, fReal, fInt, fNew, fLook, fUp, fLen, fMap,
     fTerm (Add t1 t2)    = fAdd  (fTerm t1) (fTerm t2)
     fTerm (Mult t1 t2)   = fMult (fTerm t1) (fTerm t2)
     fTerm (Dot t1 t2)    = fDot  (fTerm t1) (fTerm t2)
+    
 
 
     
