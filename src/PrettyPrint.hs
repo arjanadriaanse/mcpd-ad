@@ -11,8 +11,8 @@ instance Show Type where
     show (TPair y1 y2) = "<" ++ show y1 ++ ", " ++ show y2 ++ ">"
 
 instance Show Term where
-    show = foldTerm (fVar, fReal, fInt, fPair, fCase, fNew, fLook, fUp, fLen, fMap, 
-        fFold, fFun, fApp, fSig, fAdd, fMult, fDot,
+    show = foldTerm (fVar, fReal, fInt, fPair, fCase, fFun, fApp, fNew, fLen, fLook, fUp, fMap, 
+        fFold, fSig, fAdd, fMult, fDot, fAdd, fMult,
         idTypeAlgebra) where
             fVar  = id
             fReal = show 
