@@ -47,8 +47,9 @@ foldType (fInt, fReal, fArray, fPair, fFun) = fType
     fType (TFun t1 t2) = fFun (fType t1) (fType t2)
 
 foldTerm :: TermAlgebra a b -> Term -> a
-foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult, fDot, fIntAdd, fIntMult, fNew, fLength, fLookup, fUpdate, fMap, fFold, fCase, fApply 
-            , aType) = fTerm where
+foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult,
+          fDot, fIntAdd, fIntMult, fNew, fLength, fLookup, fUpdate, fMap,
+          fFold, fCase, fApply, aType) = fTerm where
     fTerm (Var x)            = fVar  x 
     fTerm (CReal n)          = fCReal n
     fTerm (CInt n)           = fCInt  n 

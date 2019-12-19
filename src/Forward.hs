@@ -5,8 +5,8 @@ import Algebra
 
 differentiate :: Term -> Term
 differentiate = foldTerm
-  (Var, fCReal, CInt, CArray, Pair, Fun, fSigmoid, fAdd, fMult, Dot, IntAdd, IntMult, New, Length, Lookup,
-   Update, Map, Fold, Case, Apply,
+  (Var, fCReal, CInt, CArray, Pair, Fun, fSigmoid, fAdd, fMult, Dot,
+   IntAdd, IntMult, New, Length, Lookup, Update, Map, Fold, Case, Apply,
    (fTReal, TInt, TArray, TPair, TFun)) where
   fTReal = TPair TReal TReal
   fCReal n = Pair (CReal n) (CReal 0)

@@ -20,7 +20,9 @@ library
   -- exposed-modules:
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base >=4.12 && <4.13,
+                       containers >= 0.6.0.1,
+                       mtl >= 2.2.2
   hs-source-dirs:      src
   default-language:    Haskell2010
 
@@ -29,8 +31,11 @@ executable mcpd-ad
   other-modules:       Language,
                        Algebra,
                        PrettyPrint,
+                       Variable,
                        Forward
   -- other-extensions:
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base >=4.12 && <4.13,
+                       containers,
+                       mtl
   hs-source-dirs:      src
   default-language:    Haskell2010
