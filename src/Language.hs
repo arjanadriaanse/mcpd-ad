@@ -12,7 +12,7 @@ type Identifier = String
 data Term = Var     Identifier
           | CReal   Double
           | CInt    Int
-          | CArray  [Term]
+          | CArray  Type [Term]
           | Pair    Term Term
           | Fun     Type Type Identifier Term
           | Sigmoid Term

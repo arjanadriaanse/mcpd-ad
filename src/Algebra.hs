@@ -14,7 +14,7 @@ type TermAlgebra a b = (
   Identifier  -> a, -- Var
   Double      -> a, -- CReal
   Int         -> a, -- CInt
-  [a]         -> a, -- CArray
+  b -> [a]     -> a, -- CArray
   a -> a -> a, -- Pair
   b -> b -> Identifier -> a -> a, -- Fun
   a      -> a, -- Sigmoid  
@@ -52,7 +52,7 @@ foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult, fDot
     fTerm (Var x)            = fVar  x 
     fTerm (CReal n)          = fCReal n
     fTerm (CInt n)           = fCInt  n 
-    fTerm (CArray ts)        = fCArray (map fTerm ts)
+    fTerm (CArray y ts)        = fCArray (fType y) (map fTerm ts)
     fTerm (Pair t1 t2)       = fPair (fTerm t1) (fTerm t2)
     fTerm (Fun y1 y2 x t)    = fFun  (fType y1) (fType y2) x (fTerm t)
     fTerm (Sigmoid t)    = fSigmoid  (fTerm t)
