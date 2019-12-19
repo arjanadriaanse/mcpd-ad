@@ -5,11 +5,11 @@ import Algebra
 
 differentiate :: Term -> Term
 differentiate = foldTerm
-  (Var, fReal, CInt, Pair, Case, Fun, Apply, New, Length, Lookup,
-   Update, Map, Fold, fSigmoid, fAdd, fMult, Dot, IntAdd, IntMult,
-   (fTReal, TInt, TPair, TArray, TFun)) where
+  (Var, fCReal, CInt, CArray, Pair, Fun, fSigmoid, fAdd, fMult, Dot, IntAdd, IntMult, New, Length, Lookup,
+   Update, Map, Fold, Case, Apply,
+   (fTReal, TInt, TArray, TPair, TFun)) where
   fTReal = TPair TReal TReal
-  fReal n = Pair (CReal n) (CReal 0)
+  fCReal n = Pair (CReal n) (CReal 0)
   fAdd t s = Case t "x" "x'" (Case s "y" "y'"
                               (Pair (Var "x" `Add` Var "y")
                                (Var "x'" `Add` Var "y'")))
