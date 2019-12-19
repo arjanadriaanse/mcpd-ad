@@ -14,6 +14,9 @@ import Control.Monad.State.Strict
 class Counter a where
   add :: State a Int
 
+instance Counter Int where
+  add = state $ \i -> (i, i + 1)
+
 instance Counter AlphaRenameState where
   add = state (\(i, m) -> (i, (i + 1, m)))
 

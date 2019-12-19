@@ -2,12 +2,15 @@ module Forward where
 
 import Language
 import Algebra
+import Variable
+
+import Control.Monad.State.Strict
 
 differentiate :: Term -> Term
 differentiate = foldTerm
   (Var, fCReal, CInt, CArray, Pair, Fun, fSigmoid, fAdd, fMult, Dot,
    IntAdd, IntMult, New, Length, Lookup, Update, Map, Fold, Case, Apply,
-   (fTReal, TInt, TArray, TPair, TFun)) where
+   (fTReal, TInt, TArray, TPair, TFun)) . alphaRename where
   fTReal = TPair TReal TReal
   fCReal n = Pair (CReal n) (CReal 0)
   fAdd t s = Case t "x" "x'" (Case s "y" "y'"
