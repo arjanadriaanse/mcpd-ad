@@ -3,6 +3,7 @@ module Main where
 import Language
 import Forward
 import PrettyPrint
+import StaticCheck
 import Variable
 import AbstractMachine
 

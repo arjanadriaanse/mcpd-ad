@@ -23,7 +23,8 @@ executable mcpd-ad
                        PrettyPrint,
                        Variable,
                        Forward,
-                       AbstractMachine
+                       AbstractMachine,
+                       StaticCheck
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13,
                        containers >= 0.6.0.1,

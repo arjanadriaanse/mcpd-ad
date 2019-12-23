@@ -5,7 +5,8 @@ data Type = TReal
           | TInt
           | TArray Type
           | TPair  Type Type
-          | TFun   Type Type  
+          | TFun   Type Type
+          deriving (Eq, Ord)
 
 type Identifier = String
 
