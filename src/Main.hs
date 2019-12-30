@@ -4,13 +4,16 @@ import Language
 import Forward
 import PrettyPrint
 import Variable
+import AbstractMachine
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
 
+example0 :: Term 
+example0 = Mult (CReal 2) (Var "x")
 
 example :: Term
-example = Fun TReal TReal "x" (Mult (Var "x") (Var "x"))
+example = Apply (Fun TReal TReal "y" (Mult (Var "y") (Var "y"))) (CReal 10)
 
 exampleFst :: Term
 exampleFst = Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "id2" (Var "id1") )
