@@ -13,7 +13,12 @@ example0 :: Term
 example0 = Mult (CReal 2) (Var "x")
 
 example :: Term
-example = Apply (Fun TReal TReal "y" (Mult (Var "y") (Var "y"))) (CReal 10)
+example = Apply (Fun TReal TReal "y" (Add (Var "y") (Var "y"))) (CReal 10)
+
+exampleNest :: Term 
+exampleNest = Apply (Fun TReal TReal "x" (Apply f (CReal 20))) (CReal 8000)
+    where 
+        f = Fun TReal TReal "y" (Add (Var "x") (Var "y")) 
 
 exampleFst :: Term
 exampleFst = Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "id2" (Var "id1") )

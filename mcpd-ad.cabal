@@ -32,7 +32,8 @@ executable mcpd-ad
                        Algebra,
                        PrettyPrint,
                        Variable,
-                       Forward
+                       Forward,
+                       AbstractMachine
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13,
                        containers,
