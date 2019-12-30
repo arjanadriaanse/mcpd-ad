@@ -42,12 +42,12 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
   fFun t1 t2 x e  = do
       modify (\(MachineState env _) -> (MachineState env e))
       Fun <$> t1 <*> t2 <*> return x <*> return (Var "xd")
-  fCase e x y e3 = undefined --local $ do
-  --    pair <- e 
-  --    case pair of 
-  --        (Pair e1 e2) -> do
-  --          modify (M.insert y e2 . M.insert x e1)
-  --          e3
+  fCase e x y e3 = local $ do
+      pair <- e 
+      case pair of 
+          (Pair e1 e2) -> do
+            modify (envInsert y e2 . envInsert x e1)
+            e3
   fApply e1 e2 = local $ do 
         func <- e1
         e    <- e2

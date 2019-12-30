@@ -21,7 +21,7 @@ exampleNest = Apply (Fun TReal TReal "x" (Apply f (CReal 20))) (CReal 8000)
         f = Fun TReal TReal "y" (Add (Var "x") (Var "y")) 
 
 exampleFst :: Term
-exampleFst = Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "id2" (Var "id1") )
+exampleFst = Apply (Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "id2" (Var "id1") )) (Pair (CReal 1) (CReal 20))
 
 example2 :: Term
 example2 = Fun TReal TReal "x" ((Fun TReal TReal "x" (Var "x" `Mult` Var "x")) `Apply` (Var "x"))
