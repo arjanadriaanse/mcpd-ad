@@ -18,7 +18,7 @@ instance Show Term where
             fVar  = id
             fCReal = show
             fCInt  = show
-            fCArray y ts = "array : " ++ show y ++ " [" ++ intercalate "," ts ++ "]" 
+            fCArray y ts = "array : " ++ show y ++ show ts -- ++ show y ++ " [" ++ intercalate "," ts ++ "]" 
             -- Pair, case
             fPair t1 t2       = "<" ++ t1 ++ ", " ++ t2 ++ ">"
             fCase t1 x1 x2 t2 = "case " ++ t1 ++ " of " ++ fPair x1 x2 ++ " -> " ++ t2

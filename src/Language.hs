@@ -1,4 +1,5 @@
 module Language where
+import qualified Data.Vector as V 
 
 data Type = TReal
           | TInt
@@ -12,7 +13,7 @@ type Identifier = String
 data Term = Var     Identifier
           | CReal   Double
           | CInt    Int
-          | CArray  Type [Term]
+          | CArray  Type (V.Vector Term)
           | Pair    Term Term
           | Fun     Type Type Identifier Term
           | Sigmoid Term

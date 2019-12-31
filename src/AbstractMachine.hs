@@ -7,7 +7,7 @@ import Algebra
 import qualified Data.Map.Strict as M
 import Control.Monad
 import Control.Monad.State.Strict
-
+import qualified Data.Vector as V
 type Env = M.Map Identifier Term
 data MachineState = MachineState Env (State MachineState Term)
 
@@ -20,7 +20,7 @@ local command = do
   return result
 
 defaultmachinestate :: MachineState
-defaultmachinestate = MachineState M.empty (return (Var "xd"))
+defaultmachinestate = MachineState M.empty undefined
 
 envLookup :: Identifier -> MachineState -> Maybe Term 
 envLookup x (MachineState env _)  = M.lookup x env
@@ -41,7 +41,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
         (Just e) -> return e
   fFun t1 t2 x e  = do
       modify (\(MachineState env _) -> (MachineState env e))
-      Fun <$> t1 <*> t2 <*> return x <*> return (Var "xd")
+      Fun <$> t1 <*> t2 <*> return x <*> return undefined
   fCase e x y e3 = local $ do
       pair <- e 
       case pair of 
@@ -58,12 +58,12 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 body
   fSigmoid   = undefined 
   fDot       = undefined 
-  fNew       = undefined 
-  fLength       = undefined 
-  fLookup       = undefined 
-  fUpdate       = undefined 
+  fNew tau n = undefined
+  fLength    = undefined 
+  fLookup    = undefined 
+  fUpdate    = undefined 
   fMap       = undefined 
-  fFold       = undefined 
+  fFold      = undefined 
   
   fAdd n1 n2 = do 
       r1 <- n1 
