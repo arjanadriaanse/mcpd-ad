@@ -123,4 +123,7 @@ operator op n1 n2 = do
     r1 <- n1 
     r2 <- n2
     case (r1,r2) of 
-          (CReal c1, CReal c2)   -> return (CReal (op c1 c2))
+          (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
+          (CReal c1, CInt c2)   -> return (CReal (op c1 (fromIntegral c2)))
+          (CInt c1, CReal c2)   -> return (CReal (op (fromIntegral c1) c2))
+          (CInt c1, CInt c2)    -> return (CReal (op (fromIntegral c1) (fromIntegral c2)))
