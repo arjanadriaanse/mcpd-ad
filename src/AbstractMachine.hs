@@ -40,36 +40,39 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
         Nothing -> error "Variable not found"
         (Just e) -> return e
   fFun t1 t2 x e  = do
+      -- Evaluating a function definition results in nothing
+      -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      Fun <$> t1 <*> t2 <*> return x <*> return undefined
-  fCase e x y e3 = local $ do
-      pair <- e 
+      Fun <$> t1 <*> t2 <*> return x <*> return (error "fFun")
+  fCase pairexp x y exp2 = local $ do
+      pair <- pairexp
+      -- put the variables in the environment and execute exp2
       case pair of 
-          (Pair e1 e2) -> do
-            modify (envInsert y e2 . envInsert x e1)
-            e3
+          (Pair p1 p2) -> do
+            modify (envInsert y p2 . envInsert x p1)
+            exp2
   fApply e1 e2 = local $ do 
         func <- e1
-        e    <- e2
+        arg  <- e2
         case func of 
             (Fun _ _ x _) -> do
-                modify (envInsert x e)
+                modify (envInsert x arg)
                 body <- gets (\(MachineState _ val) -> val)
                 body
-  fNew tau n = do 
-      nr   <- n 
-      tau2 <- tau
-      case nr of 
-          (CInt c) -> return $ CArray tau2 (V.replicate c (CReal 0)) -- for now
-  fLength t  = do
-      array <- t  
+  fNew t1 n = do 
+      len  <- n 
+      t    <- t1
+      case len of 
+          (CInt i) -> return $ CArray t (V.replicate i (CReal 0)) -- for now
+  fLength e  = do
+      array <- e  
       case array of 
           (CArray _ a ) -> return $ CInt (V.length a)
-  fLookup t i = do 
+  fLookup e i = do 
       index <- i 
-      array <- t 
+      array <- e 
       case (index, array) of 
-          ((CInt c), (CArray _ a)) -> return $ ( a V.! c )
+          ((CInt i), (CArray _ a)) -> return $ ( a V.! i )
   fUpdate a i v = do 
        array <- a 
        index <- i 
@@ -77,37 +80,39 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
        case (index, array) of
           ((CInt c), (CArray t ar)) -> return $ CArray t ( (V.//) ar [(c, value)] )
   fMap f a = do 
-      f2 <- f 
-      a2 <- a 
-      case (f2, a2) of 
-          ((Fun t1 t2 x t), (CArray _ vec )) -> do 
-                list <- V.mapM (fApply f) (V.map return vec)
-                return $ CArray t2 list
+      func  <- f 
+      array <- a 
+      case (func, array) of 
+          ((Fun _ t2 _ _), (CArray _ vec )) -> do 
+                newvec <- V.mapM (fApply f) (V.map return vec)
+                return $ CArray t2 newvec
   fFold f b a = do 
-      f2 <- f 
-      a2 <- a 
-      b2 <- b 
-      case (f2, a2) of 
-          ((Fun t1 t2 x t), (CArray _ vec )) -> do 
-                list <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) b2 vec
-                return list
-  fSigmoid = operatorUn (\z -> 1 / (1+ exp(-z)))
+      func  <- f 
+      array <- a 
+      start <- b 
+      case array of 
+          (CArray _ vec ) -> do 
+                result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
+                return result
+  fSigmoid = operatorUn (\z -> 1 / ( 1 + exp(-z)))
   fDot     = undefined
-  fAdd     = operator (+) -- elementwise
+  fAdd     = operator (+) -- todo: elementwise
   fMult    = operator (*)
   fIntAdd  = operatorInt (+)
   fIntMult = operatorInt (*)
 
+-- helper functions for binary, unary operators
 operatorInt op n1 n2 = do 
     r1 <- n1 
     r2 <- n2
     case (r1,r2) of 
-          (CInt c1, CInt c2)   -> return (CInt (op c1 c2))
+          (CInt c1, CInt c2) -> return (CInt (op c1 c2))
 
 operatorUn op n = do 
     r1 <- n
     case r1 of 
         (CReal c1) -> return (CReal (op c1))
+
 operator op n1 n2 = do 
     r1 <- n1 
     r2 <- n2
