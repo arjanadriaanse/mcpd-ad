@@ -30,3 +30,20 @@ data Term = Var     Identifier
           | Fold    Term Term Term
           | Case    Term Identifier Identifier Term
           | Apply   Term Term
+
+instance Num Term where
+  (+) = Add
+  (*) = Mult
+  abs (CInt n) = CInt (abs n)
+  abs (CReal n) = CReal (abs n)
+  abs _ = undefined
+  signum (CInt n) = CInt (signum n)
+  signum (CReal n) = CReal (signum n)
+  signum _ = undefined
+  fromInteger = CInt . fromInteger
+  negate n = CInt (-1) * n
+
+($$) :: Term -> Term -> Term
+($$) = Apply
+
+
