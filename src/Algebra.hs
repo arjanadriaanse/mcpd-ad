@@ -50,7 +50,7 @@ foldTerm :: TermAlgebra a b -> Term -> a
 foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult,
           fDot, fIntAdd, fIntMult, fNew, fLength, fLookup, fUpdate, fMap,
           fFold, fCase, fApply, aType) = fTerm where
-    fTerm (Var x)            = fVar  x 
+    fTerm (Var x)            = fVar   x 
     fTerm (CReal n)          = fCReal n
     fTerm (CInt n)           = fCInt  n 
     fTerm (CArray y ts)        = fCArray (fType y) (V.map fTerm ts)
@@ -63,12 +63,12 @@ foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult,
     fTerm (IntAdd t1 t2) = fIntAdd  (fTerm t1) (fTerm t2)
     fTerm (IntMult t1 t2)= fIntMult (fTerm t1) (fTerm t2)
     fTerm (New y t)          = fNew  (fType y)  (fTerm t)
-    fTerm (Length t)         = fLength  (fTerm t)
+    fTerm (Length t)         = fLength (fTerm t)
     fTerm (Lookup t1 t2)     = fLookup (fTerm t1) (fTerm t2)
-    fTerm (Update t1 t2 t3)  = fUpdate   (fTerm t1) (fTerm t2) (fTerm t3)
+    fTerm (Update t1 t2 t3)  = fUpdate (fTerm t1) (fTerm t2) (fTerm t3)
     fTerm (Map t1 t2)        = fMap (fTerm t1) (fTerm t2)
     fTerm (Fold t1 t2 t3)    = fFold (fTerm t1) (fTerm t2) (fTerm t3)
     fTerm (Case t1 x1 x2 t2) = fCase (fTerm t1) x1 x2 (fTerm t2)
-    fTerm (Apply t1 t2)      = fApply  (fTerm t1) (fTerm t2)
+    fTerm (Apply t1 t2)      = fApply (fTerm t1) (fTerm t2)
     -- Algebra
     fType                = foldType aType

@@ -35,4 +35,11 @@ newIndexList = Update (New TReal (CInt 10)) (CInt 1) (5 + 9)
 
 examplef :: Term
 examplef = Fold f (CReal 0) exampleMap where 
-    f =Fun TReal TReal "b" ((Fun TReal TReal "x" (Var "x" `Add` Var "b")))
+    f = Fun TReal TReal "b" ((Fun TReal TReal "x" (Var "x" `Add` Var "b"))) 
+
+    -- def hallo(typle, yple, yple) 
+
+
+testNested = Apply (Apply f (CReal 10)) (CReal 9)
+    where 
+        f = fun [(TReal, "x"),(TReal, "y")] TReal (Mult (Var "x") (Var "y")) 
