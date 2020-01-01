@@ -25,3 +25,10 @@ exampleFst = Apply (Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "i
 
 example2 :: Term
 example2 = Fun TReal TReal "x" ((Fun TReal TReal "x" (Var "x" `Mult` Var "x")) `Apply` (Var "x"))
+
+exampleMap :: Term 
+exampleMap = Map (Fun TReal TReal "x" ( Add (Var "x") (CReal 20))) (New TReal (CInt 10))
+
+examplef :: Term
+examplef = Fold f (CReal 0) exampleMap where 
+    f =Fun TReal TReal "b" ((Fun TReal TReal "x" (Var "x" `Add` Var "b")))

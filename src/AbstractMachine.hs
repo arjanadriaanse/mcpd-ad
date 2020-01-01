@@ -56,32 +56,60 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 modify (envInsert x e)
                 body <- gets (\(MachineState _ val) -> val)
                 body
-  fSigmoid   = undefined 
-  fDot       = undefined 
-  fNew tau n = undefined
-  fLength    = undefined 
-  fLookup    = undefined 
-  fUpdate    = undefined 
-  fMap       = undefined 
-  fFold      = undefined 
-  
-  fAdd n1 n2 = do 
-      r1 <- n1 
-      r2 <- n2
-      case (r1,r2) of 
-          (CReal c1, CReal c2) -> return (CReal (c1 + c2))
-  fMult n1 n2 = do 
-      r1 <- n1 
-      r2 <- n2
-      case (r1,r2) of 
-          (CReal c1, CReal c2) -> return (CReal (c1 * c2))
-  fIntAdd n1 n2 = do 
-      r1 <- n1 
-      r2 <- n2
-      case (r1,r2) of 
-          (CInt c1, CInt c2) -> return (CInt (c1 + c2))
-  fIntMult n1 n2 = do 
-      r1 <- n1 
-      r2 <- n2
-      case (r1,r2) of 
-          (CInt c1, CInt c2) -> return (CInt (c1 * c2))
+  fNew tau n = do 
+      nr   <- n 
+      tau2 <- tau
+      case nr of 
+          (CInt c) -> return $ CArray tau2 (V.replicate c (CReal 0)) -- for now
+  fLength t  = do
+      array <- t  
+      case array of 
+          (CArray _ a ) -> return $ CInt (V.length a)
+  fLookup t i = do 
+      index <- i 
+      array <- t 
+      case (index, array) of 
+          ((CInt c), (CArray _ a)) -> return $ ( a V.! c )
+  fUpdate a i v = do 
+       array <- a 
+       index <- i 
+       value <- v
+       case (index, array) of
+          ((CInt c), (CArray t ar)) -> return $ CArray t ( (V.//) ar [(c, value)] )
+  fMap f a = do 
+      f2 <- f 
+      a2 <- a 
+      case (f2, a2) of 
+          ((Fun t1 t2 x t), (CArray _ vec )) -> do 
+                list <- V.mapM (fApply f) (V.map return vec)
+                return $ CArray t2 list
+  fFold f b a = do 
+      f2 <- f 
+      a2 <- a 
+      b2 <- b 
+      case (f2, a2) of 
+          ((Fun t1 t2 x t), (CArray _ vec )) -> do 
+                list <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) b2 vec
+                return list
+  fSigmoid = operatorUn (\z -> 1 / (1+ exp(-z)))
+  fDot     = undefined
+  fAdd     = operator (+) -- elementwise
+  fMult    = operator (*)
+  fIntAdd  = operatorInt (+)
+  fIntMult = operatorInt (*)
+
+operatorInt op n1 n2 = do 
+    r1 <- n1 
+    r2 <- n2
+    case (r1,r2) of 
+          (CInt c1, CInt c2)   -> return (CInt (op c1 c2))
+
+operatorUn op n = do 
+    r1 <- n
+    case r1 of 
+        (CReal c1) -> return (CReal (op c1))
+operator op n1 n2 = do 
+    r1 <- n1 
+    r2 <- n2
+    case (r1,r2) of 
+          (CReal c1, CReal c2)   -> return (CReal (op c1 c2))
