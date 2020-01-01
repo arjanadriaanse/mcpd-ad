@@ -49,5 +49,5 @@ instance Num Term where
 fun :: [(Type, Identifier)] -> Type -> Term -> Term 
 fun []  _ b          = b 
 fun [(t1, x)] t2 b   = Fun t1 t2 x b
-fun ((t1,x):xs) t2 b = Apply (Fun (TFun t1 t3) t2 y body2) (Var x) where 
+fun ((t1,x):xs) t2 b = (Fun (TFun t1 t3) t2 x f) where 
     f@(Fun t3 _ y body2 ) = fun xs t2 b 

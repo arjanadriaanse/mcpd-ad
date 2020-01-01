@@ -40,11 +40,11 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       case v of
         Nothing -> error "Variable not found"
         (Just e) -> return e
-  fFun t1 t2 x e  = do
+  fFun t1 t2 x e  = do --  local $
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      Fun <$> t1 <*> t2 <*> return x <*> return (error "fFun")
+      Fun <$> t1 <*> t2 <*> return x <*> return (error "Function cannot be evaluated")
   fCase pairexp x y exp2 = local $ do
       pair <- pairexp
       -- put the variables in the environment and execute exp2
@@ -52,9 +52,9 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (Pair p1 p2) -> do
             modify (envInsert y p2 . envInsert x p1)
             exp2
-  fApply e1 e2 = local $ do 
-        func <- e1
+  fApply e1 e2 = do 
         arg  <- e2
+        func <- e1
         case func of 
             (Fun _ _ x _) -> do
                 modify (envInsert x arg)

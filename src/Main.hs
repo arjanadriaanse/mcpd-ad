@@ -40,6 +40,6 @@ examplef = Fold f (CReal 0) exampleMap where
     -- def hallo(typle, yple, yple) 
 
 
-testNested = Apply (Apply f (CReal 10)) (CReal 9)
+testNested =(Apply f (CReal 10))
     where 
         f = fun [(TReal, "x"),(TReal, "y")] TReal (Mult (Var "x") (Var "y")) 
