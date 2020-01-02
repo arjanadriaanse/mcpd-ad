@@ -8,7 +8,7 @@ instance Show Type where
     show TInt          = "int"
     show TReal         = "real"
     show (TArray y)    = "[" ++ show y ++ "]" 
-    show (TFun y1 y2)  = show y1 ++ " -> " ++ show y2
+    show (TFun y1 y2)  = "(" ++ show y1 ++ " -> " ++ show y2 ++ ")"
     show (TPair y1 y2) = "<" ++ show y1 ++ ", " ++ show y2 ++ ">"
 
 instance Show Term where

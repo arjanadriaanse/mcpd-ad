@@ -10,17 +10,18 @@ main :: IO ()
 main = putStrLn "Hello, Haskell!"
 
 example0 :: Term 
-example0 = Mult (CReal 2) (Var "x")
+example0 = 2 * var "x"
 
 example :: Term
-example = Apply test (Pair 10 1)
+example = test $$ (10 $* 1)
 
-test = differentiate (Fun TReal TReal "y" ( Var "y" * Var "y" + Var "y"))
+test :: Term
+test = differentiate $ fun [("y", real)] (var "y" * Var "y" + Var "y", real)
 
 exampleNest :: Term 
-exampleNest = Apply (Fun TReal TReal "x" (Apply f (CReal 20))) (CReal 8000)
+exampleNest = fun [("y", real)] (f $$ 20, real) $$ 8000
     where 
-        f = Fun TReal TReal "y" (Add (Var "x") (Var "y")) 
+        f = fun [("y", real)] (var "x" + var "y", real) 
 
 exampleFst :: Term
 exampleFst = Apply (Fun (TPair TReal TReal) (TReal) "x" (Case (Var "x") "id1" "id2" (Var "id1") )) (Pair (CReal 1) (CReal 20))
@@ -36,11 +37,11 @@ exampleDot = Dot exampleMap exampleMap
 
 
 newIndexList :: Term 
-newIndexList = Update (New TReal 10) 1 (5.1 + 9)
+newIndexList = update (new real (CInt 10)) (CInt 1) (5.1 + 9)
 
 examplef :: Term
-examplef = Fold f 0 exampleMap where 
-    f = Fun TReal TReal "b" ((Fun TReal TReal "x" (Var "x" `Add` Var "b"))) 
+examplef = fold f 0 exampleMap where 
+    f = fun [("b", real), ("x", real)] (var "x" + var "b", real) 
 
 
 testNested = f $$ CReal 10 $$ 5 $$ 3

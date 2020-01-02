@@ -72,14 +72,17 @@ var :: Identifier -> Term
 var = Var 
 
 fun :: [(Identifier, Type)] -> (Term, Type) -> Term 
-fun [] (b, _)              = b 
+fun [] (b, _)              = b
 fun ((x, t1) : []) (b, t2) = Fun t1 t2 x b
-fun ((x, t1) : xs) (b, t2) = Fun (TFun t1 t3) t2 x f
+fun ((x, t1) : xs) (b, t2) = Fun t1 (TFun t3 t4) x f
   where 
-    f@(Fun t3 _ _ _) = fun xs (b, t2)
+    f@(Fun t3 t4 _ _) = fun xs (b, t2)
 
 sigmoid :: Term -> Term 
 sigmoid = Sigmoid 
+
+dot :: Term -> Term -> Term
+dot = Dot
 
 iadd :: Term -> Term -> Term 
 iadd = IntAdd 
