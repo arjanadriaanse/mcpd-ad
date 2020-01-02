@@ -15,9 +15,9 @@ data MachineState = MachineState Env (State MachineState Term)
 
 local :: State MachineState a -> State MachineState a
 local command = do
-  m      <- get 
+  MachineState e _ <- get
   result <- command
-  modify $ const m 
+  modify $ \(MachineState _ f) -> MachineState e f
   return result
 
 defaultmachinestate :: MachineState
@@ -40,7 +40,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       case v of
         Nothing -> error "Variable not found"
         (Just e) -> return e
-  fFun t1 t2 x e  = do --  local $
+  fFun t1 t2 x e  =  local $ do
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
@@ -101,9 +101,14 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
                 return result
   fSigmoid = operatorUn (\z -> 1 / (1 + exp(-z)))
-  fDot     = undefined
+  fDot a1 a2 = do
+      v1 <- a1 
+      v2 <- a2 
+      case (v1, v2) of 
+          ((CArray _ vec1), CArray _ vec2) -> do 
+                return $ evaluate (V.sum (V.zipWith (*) vec1 vec2 )) -- TODO
   fAdd     = operator (+) -- todo: elementwise
-  fMult    = operator (*)
+  fMult    = operator (*) 
   fIntAdd  = operatorInt (+)
   fIntMult = operatorInt (*)
 
@@ -118,6 +123,7 @@ operatorUn op n = do
     r1 <- n
     case r1 of 
         (CReal c1) -> return (CReal (op c1))
+        (CInt c1)  -> return (CReal (op (fromIntegral c1)))
 
 operator op n1 n2 = do 
     r1 <- n1 

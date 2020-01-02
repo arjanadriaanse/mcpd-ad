@@ -13,7 +13,9 @@ example0 :: Term
 example0 = Mult (CReal 2) (Var "x")
 
 example :: Term
-example = Apply (Fun TReal TReal "y" (Add (Var "y") (Var "y"))) (CReal 10)
+example = Apply test (Pair 10 1)
+
+test = differentiate (Fun TReal TReal "y" ( Var "y" * Var "y" + Var "y"))
 
 exampleNest :: Term 
 exampleNest = Apply (Fun TReal TReal "x" (Apply f (CReal 20))) (CReal 8000)
@@ -29,15 +31,16 @@ example2 = Fun TReal TReal "x" ((Fun TReal TReal "x" (Var "x" `Mult` Var "x")) `
 exampleMap :: Term 
 exampleMap = Map (Fun TReal TReal "x" ( Add (Var "x") (CReal 20))) (New TReal (CInt 10))
 
-newIndexList :: Term 
-newIndexList = Update (New TReal (CInt 10)) (CInt 1) (5 + 9)
+exampleDot :: Term 
+exampleDot = Dot exampleMap exampleMap
 
+
+newIndexList :: Term 
+newIndexList = Update (New TReal 10) 1 (5.1 + 9)
 
 examplef :: Term
-examplef = Fold f (CReal 0) exampleMap where 
+examplef = Fold f 0 exampleMap where 
     f = Fun TReal TReal "b" ((Fun TReal TReal "x" (Var "x" `Add` Var "b"))) 
-
-    -- def hallo(typle, yple, yple) 
 
 
 testNested = f $$ CReal 10 $$ 5 $$ 3

@@ -31,23 +31,42 @@ data Term = Var     Identifier
           | Apply   Term Term
 
 instance Num Term where
-  (+) = Add
-  (*) = Mult
-  abs (CInt n) = CInt (abs n)
+  (+)           = Add
+  (*)           = Mult
   abs (CReal n) = CReal (abs n)
-  abs _ = undefined
-  signum (CInt n) = CInt (signum n)
+  abs _         = error "Not supported"
   signum (CReal n) = CReal (signum n)
-  signum _ = undefined
-  fromInteger = CInt . fromInteger
-  negate n = CInt (-1) * n
+  signum _      = error "Not supported"
+  fromInteger   = CReal . fromInteger
+  negate n      = CReal (-1) * n
 
 instance Fractional Term where
   fromRational = CReal . fromRational
-  (/) = undefined -- TODO
+  (/)          = error "Not supported YET" -- TODO
 
-($$) :: Term -> Term -> Term
-($$) = Apply
+-- | Misc. Sugar
+let_ :: Identifier -> (Term, Type) -> (Term, Type) -> Term
+let_ x (v, t1) (b, t2) = Fun t1 t2 x b $$ v
+
+-- | Type Sugar
+real :: Type 
+real = TReal
+
+int :: Type 
+int = TInt 
+
+array :: Type -> Type
+array = TArray
+
+($*) :: Type  -> Type -> Type
+($*) = TPair 
+
+-- | Term Sugar 
+var :: Identifier -> Term 
+var = Var 
+
+pair :: Term -> Term -> Term
+pair = Pair
 
 fun :: [(Identifier, Type)] -> (Term, Type) -> Term 
 fun [] (b, _)              = b 
@@ -56,5 +75,38 @@ fun ((x, t1) : xs) (b, t2) = Fun (TFun t1 t3) t2 x f
   where 
     f@(Fun t3 _ _ _) = fun xs (b, t2)
 
-let_ :: Identifier -> (Term, Type) -> (Term, Type) -> Term
-let_ x (v, t1) (b, t2) = Fun t1 t2 x b $$ v
+sigmoid :: Term -> Term 
+sigmoid = Sigmoid 
+
+iadd :: Term -> Term -> Term 
+iadd = IntAdd 
+
+imult :: Term -> Term -> Term 
+imult = IntMult 
+
+new :: Type -> Term -> Term
+new = New 
+
+length_ :: Term -> Term 
+length_ = Length 
+
+lookup :: Term -> Term -> Term
+lookup = Lookup 
+
+update :: Term -> Term -> Term -> Term 
+update = Update 
+
+map_ :: Term -> Term -> Term 
+map_ = Map 
+
+fold :: Term -> Term -> Term -> Term 
+fold = Fold
+
+case_ :: Term -> Identifier -> Identifier -> Term -> Term 
+case_ = Case 
+
+($$) :: Term -> Term -> Term
+($$) = Apply
+
+
+

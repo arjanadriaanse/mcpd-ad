@@ -21,7 +21,7 @@ instance Show Term where
             fCArray y ts = "array : " ++ show y ++ " [" ++ intercalate "," (V.toList ts) ++ "]" 
             -- Pair, case
             fPair t1 t2       = "<" ++ t1 ++ ", " ++ t2 ++ ">"
-            fCase t1 x1 x2 t2 = "case " ++ t1 ++ " of " ++ fPair x1 x2 ++ " -> " ++ t2
+            fCase t1 x1 x2 t2 = "(case " ++ t1 ++ " of " ++ fPair x1 x2 ++ " -> " ++ t2 ++ ")"
             
             -- The rest
             fNew y size      = ("new " ++ show y) ++ " " ++ size 
