@@ -42,9 +42,12 @@ instance Num Term where
   fromInteger = CInt . fromInteger
   negate n = CInt (-1) * n
 
+instance Fractional Term where
+  fromRational = CReal . fromRational
+  (/) = undefined -- TODO
+
 ($$) :: Term -> Term -> Term
 ($$) = Apply
-
 
 fun :: [(Type, Identifier)] -> Type -> Term -> Term 
 fun []  _ b          = b 
