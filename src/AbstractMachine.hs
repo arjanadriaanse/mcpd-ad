@@ -65,8 +65,11 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       t    <- t1
       case len of 
           (CInt i) -> case t of 
-              TReal -> return $ CArray t (V.replicate i (CReal 0)) -- for now
-              _     ->  error (show t)
+              TReal -> return $ CArray t (V.replicate i (CReal 0))
+              TInt  -> return $ CArray t (V.replicate i (CInt 0))
+              -- TODO We need to specify length of inner arrays as well, to allocate 
+              -- TArray inner -> return $ CArray inner (V.replicate i (fNew  ... ))
+              _     -> error ("Cannot make array of type " ++ show t)
   fLength e  = do
       array <- e  
       case array of 
