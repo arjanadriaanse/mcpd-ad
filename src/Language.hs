@@ -30,6 +30,15 @@ data Term = Var     Identifier
           | Case    Term Identifier Identifier Term
           | Apply   Term Term
 
+class Pair a where
+  ($*) :: a -> a -> a
+
+instance Pair Type where
+  ($*) = TPair
+
+instance Pair Term where
+  ($*) = Pair
+
 instance Num Term where
   (+)           = Add
   (*)           = Mult
@@ -58,15 +67,9 @@ int = TInt
 array :: Type -> Type
 array = TArray
 
-($*) :: Type  -> Type -> Type
-($*) = TPair 
-
 -- | Term Sugar 
 var :: Identifier -> Term 
 var = Var 
-
-pair :: Term -> Term -> Term
-pair = Pair
 
 fun :: [(Identifier, Type)] -> (Term, Type) -> Term 
 fun [] (b, _)              = b 
