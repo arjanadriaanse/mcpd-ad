@@ -49,12 +49,12 @@ instance Fractional Term where
 ($$) :: Term -> Term -> Term
 ($$) = Apply
 
-fun :: [(Identifier, Type)]  -> Term -> Type -> Term 
-fun [] b _              = b 
-fun ((x, t1) : []) b t2 = Fun t1 t2 x b
-fun ((x, t1) : xs) b t2 = Fun (TFun t1 t3) t2 x f
+fun :: [(Identifier, Type)]  -> (Term, Type) -> Term 
+fun [] (b, _)              = b 
+fun ((x, t1) : []) (b, t2) = Fun t1 t2 x b
+fun ((x, t1) : xs) (b, t2) = Fun (TFun t1 t3) t2 x f
   where 
-    f@(Fun t3 _ _ _) = fun xs b t2
+    f@(Fun t3 _ _ _) = fun xs (b, t2)
 
-let_ :: Identifier -> Term -> Type -> Term -> Type -> Term
-let_ x v t1 b t2 = Fun t1 t2 x b $$ v
+let_ :: Identifier -> (Term, Type) -> (Term, Type) -> Term
+let_ x (v, t1) (b, t2) = Fun t1 t2 x b $$ v
