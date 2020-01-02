@@ -6,9 +6,10 @@ import Language
 import Algebra
 import qualified Data.Map.Strict as M
 import Control.Monad
-import PrettyPrint
 import Control.Monad.State.Strict
 import qualified Data.Vector as V
+import Data.Function (on)
+
 type Env = M.Map Identifier Term
 data MachineState = MachineState Env (State MachineState Term)
 
@@ -69,7 +70,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
               TInt  -> return $ CArray t (V.replicate i (CInt 0))
               -- TODO We need to specify length of inner arrays as well, to allocate 
               -- TArray inner -> return $ CArray inner (V.replicate i (fNew  ... ))
-              _     -> error ("Cannot make array of type " ++ show t)
+              _     -> error "type not supported"
   fLength e  = do
       array <- e  
       case array of 
@@ -105,31 +106,28 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       v1 <- a1 
       v2 <- a2 
       case (v1, v2) of 
-          ((CArray _ vec1), CArray _ vec2) -> do 
-                return $ evaluate (V.sum (V.zipWith (*) vec1 vec2 )) -- TODO
-  fAdd     = operator (+) -- todo: elementwise
-  fMult    = operator (*) 
-  fIntAdd  = operatorInt (+)
-  fIntMult = operatorInt (*)
-
--- helper functions for binary, unary operators
-operatorInt op n1 n2 = do 
-    r1 <- n1 
-    r2 <- n2
-    case (r1,r2) of 
-          (CInt c1, CInt c2) -> return (CInt (op c1 c2))
-
-operatorUn op n = do 
+          ((CArray _ vec1), CArray _ vec2) -> do
+            (V.zipWithM (fMult `on` return) vec1 vec2 ) >>=
+              V.foldM (fAdd `on` return) 0
+  fAdd     = operatorBin (+) -- todo: elementwise
+  fMult    = operatorBin (*) 
+  fIntAdd  = operatorBinInt (+)
+  fIntMult = operatorBinInt (*)
+  operatorUn op n = do 
     r1 <- n
     case r1 of 
-        (CReal c1) -> return (CReal (op c1))
-        (CInt c1)  -> return (CReal (op (fromIntegral c1)))
+      (CReal c1) -> return (CReal (op c1))
+      (CInt c1)  -> return (CReal (op (fromIntegral c1)))
 
-operator op n1 n2 = do 
+  operatorBin op n1 n2 = do 
     r1 <- n1 
     r2 <- n2
     case (r1,r2) of 
-          (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
-          (CReal c1, CInt c2)   -> return (CReal (op c1 (fromIntegral c2)))
-          (CInt c1, CReal c2)   -> return (CReal (op (fromIntegral c1) c2))
-          (CInt c1, CInt c2)    -> return (CReal (op (fromIntegral c1) (fromIntegral c2)))
+      (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
+  operatorBinInt op n1 n2 = do 
+    r1 <- n1 
+    r2 <- n2
+    case (r1,r2) of 
+      (CInt c1, CInt c2) -> return (CInt (op c1 c2))
+
+
