@@ -38,7 +38,7 @@ idTypeAlgebra :: TypeAlgebra Type
 idTypeAlgebra = (TReal, TInt, TArray, TPair, TFun)
 
 foldType :: TypeAlgebra a -> Type -> a
-foldType (fInt, fReal, fArray, fPair, fFun) = fType
+foldType (fReal, fInt, fArray, fPair, fFun) = fType
   where
     fType TReal = fReal
     fType TInt = fInt

@@ -6,6 +6,7 @@ import Language
 import Algebra
 import qualified Data.Map.Strict as M
 import Control.Monad
+import PrettyPrint
 import Control.Monad.State.Strict
 import qualified Data.Vector as V
 type Env = M.Map Identifier Term
@@ -63,7 +64,9 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       len  <- n 
       t    <- t1
       case len of 
-          (CInt i) -> return $ CArray t (V.replicate i (CReal 0)) -- for now
+          (CInt i) -> case t of 
+              TReal -> return $ CArray t (V.replicate i (CReal 0)) -- for now
+              _     ->  error (show t)
   fLength e  = do
       array <- e  
       case array of 
@@ -94,7 +97,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (CArray _ vec ) -> do 
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
                 return result
-  fSigmoid = operatorUn (\z -> 1 / ( 1 + exp(-z)))
+  fSigmoid = operatorUn (\z -> 1 / (1 + exp(-z)))
   fDot     = undefined
   fAdd     = operator (+) -- todo: elementwise
   fMult    = operator (*)
