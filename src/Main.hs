@@ -42,4 +42,4 @@ examplef = Fold f (CReal 0) exampleMap where
 
 testNested = f $$ CReal 10 $$ 5 $$ 3
     where 
-        f = fun [(TReal, "x"),(TReal, "y"), (TReal, "z")] TReal ((Var "x") * ((Var "y") + (Var "z"))) 
+        f = fun [("x", TReal),("y", TReal), ("z", TReal)] ((Var "x") * ((Var "y") + (Var "z"))) TReal 
