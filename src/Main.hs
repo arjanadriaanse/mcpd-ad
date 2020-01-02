@@ -30,7 +30,7 @@ exampleMap :: Term
 exampleMap = Map (Fun TReal TReal "x" ( Add (Var "x") (CReal 20))) (New TReal (CInt 10))
 
 newIndexList :: Term 
-newIndexList = New TInt (CInt 100)
+newIndexList = Update (New TReal (CInt 10)) (CInt 1) (5 + 9)
 
 
 examplef :: Term
