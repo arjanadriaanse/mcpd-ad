@@ -53,6 +53,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (Pair p1 p2) -> do
             modify (envInsert y p2 . envInsert x p1)
             exp2
+          _ -> error ("No pair provided")
   fApply e1 e2 = do 
         arg  <- e2
         func <- e1
