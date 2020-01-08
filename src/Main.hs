@@ -48,8 +48,16 @@ realpair = TPair real real
 exampleSnd :: Term
 exampleSnd = fun [("pair", TPair realpair realpair)] ( case_ (var "pair") "id1" "id2" (var "id2") , realpair)
 
+snd_ = fun [("in", realpair)]  ( case_ (var "in") "id1" "id2" (var "id2") , real)
+
 examplePoly :: Term
 examplePoly = fun [("x", real)] ( (3 * (var "x" * var "x" * var "x")) + var "x" * 9 ,real)
 
 exampleSecondDerivative :: Term 
-exampleSecondDerivative = examplePoly -- ?? How to do it
+exampleSecondDerivative =  (fun [("x", realpair)] (exampleSnd $$ ((differentiate examplePoly) $$ (var "x")), real)) -- ?? How to do it
+
+exampleFromPaper :: Term 
+exampleFromPaper = fun [("x", real), ("y", real)] (snd_ $$ inner, real) where 
+    inner    = (differentiate innerfun) $$ ((var "x") $* 1)
+    innerfun = (var "x") * (snd_ $$ dfy )
+    dfy      = (differentiate (var "x" + var "y")) $$ ((var "y") $* 1)
