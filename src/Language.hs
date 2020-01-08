@@ -40,8 +40,8 @@ instance Pair Term where
   ($*) = Pair
 
 instance Num Term where
-  (+)           = Add
-  (*)           = Mult
+  (+)           = BinOp Add Nothing
+  (*)           = BinOp Mult Nothing
   abs (CReal n) = CReal (abs n)
   abs _         = error "Not supported"
   signum (CReal n) = CReal (signum n)
@@ -82,13 +82,7 @@ sigmoid :: Term -> Term
 sigmoid = Sigmoid 
 
 dot :: Term -> Term -> Term
-dot = Dot
-
-iadd :: Term -> Term -> Term 
-iadd = IntAdd 
-
-imult :: Term -> Term -> Term 
-imult = IntMult 
+dot = BinOp Dot Nothing
 
 new :: Type -> Term -> Term
 new = New 
