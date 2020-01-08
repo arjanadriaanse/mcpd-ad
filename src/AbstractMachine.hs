@@ -32,8 +32,7 @@ envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
 
 evaluate :: Term -> Term 
 evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y -> (liftM2 CArray) x (sequence y)), 
-        liftM2 Pair, fFun, fSigmoid, fAdd, fMult, fDot, 
-        fIntAdd, fIntMult, fNew, fLength, fLookup, 
+        liftM2 Pair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
         fUpdate, fMap, fFold, fCase, fApply,
         (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun)) t) defaultmachinestate where 
   fVar x = do
@@ -102,33 +101,29 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (CArray _ vec ) -> do 
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
                 return result
-  fSigmoid = operatorUn (\z -> 1 / (1 + exp(-z)))
-  fDot a1 a2 = do
-      v1 <- a1 
-      v2 <- a2 
-      case (v1, v2) of 
-          ((CArray _ vec1), CArray _ vec2) -> do
-            (V.zipWithM (fMult `on` return) vec1 vec2 ) >>=
-              V.foldM (fAdd `on` return) 0
-  fAdd     = operatorBin (+) -- todo: elementwise
-  fMult    = operatorBin (*) 
-  fIntAdd  = operatorBinInt (+)
-  fIntMult = operatorBinInt (*)
-  operatorUn op n = do 
+  fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
+  fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
+  fBinOp Add t  = operatorBin (+) t -- todo: elementwise
+  fBinOp Mult t = operatorBin (*) t
+
+
+
+operatorUn op n = do 
     r1 <- n
     case r1 of 
-      (CReal c1) -> return (CReal (op c1))
-      (CInt c1)  -> return (CReal (op (fromIntegral c1)))
+        (CReal c1) -> return (CReal (op c1))
+        (CInt c1)  -> return (CReal (op (fromIntegral c1)))
 
-  operatorBin op n1 n2 = do 
+operatorBin op t n1 n2 = do 
     r1 <- n1 
     r2 <- n2
     case (r1,r2) of 
-      (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
-  operatorBinInt op n1 n2 = do 
-    r1 <- n1 
-    r2 <- n2
-    case (r1,r2) of 
-      (CInt c1, CInt c2) -> return (CInt (op c1 c2))
+        (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
 
+dotProduct fMult fAdd n1 n2 = do 
+    v1 <- n1 
+    v2 <- n2 
+    case (v1, v2) of 
+        ((CArray _ vec1), CArray _ vec2) -> do
+             (V.zipWithM (fMult `on` return) vec1 vec2 ) >>= V.foldM (fAdd `on` return) 0
 

@@ -17,7 +17,7 @@ example = df $$ (10 $* 1)
 exampleNest :: Term 
 exampleNest = fun [("y", real)] (f $$ 20, real) $$ 8000
     where 
-        f = fun [("y", real)] (var "x" + var "y", real) 
+        f = fun [("y", real)] (var "y" + var "y", real) 
 
 exampleFst :: Term
 exampleFst = fun [("x", TPair real real)] ( case_ (var "x") "id1" "id2" (var "id1") , real) $$ (Pair 10 20) 
