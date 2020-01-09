@@ -53,11 +53,9 @@ typecheck e (Fun tau1 tau2 x t) = do
   then Right $ TFun tau1 tau2
   else Left  $ TypeMismatch tau2 tauBody
 typecheck e (Sigmoid t)  = typecheck e t >>= unify TReal
-typecheck e (Add t1 t2)  = binOpCheck binOpTypes e t1 t2
-typecheck e (Mult t1 t2) = binOpCheck binOpTypes e t1 t2
-typecheck e (Dot t1 t2)  = binOpCheck (S.singleton (TArray TReal)) e t1 t2 >> Right TReal
-typecheck e (IntAdd t1 t2)  = binOpCheck (S.singleton TInt) e t1 t2
-typecheck e (IntMult t1 t2) = binOpCheck (S.singleton TInt) e t1 t2
+typecheck e (BinOp Add _ t1 t2)  = binOpCheck binOpTypes e t1 t2
+typecheck e (BinOp Mult _ t1 t2) = binOpCheck binOpTypes e t1 t2
+typecheck e (BinOp Dot _ t1 t2)  = binOpCheck (S.singleton (TArray TReal)) e t1 t2 >> Right TReal
 typecheck e (New tau t) = do
   tauL <- typecheck e t
   unify TInt tauL
