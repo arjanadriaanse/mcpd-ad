@@ -18,11 +18,7 @@ type TermAlgebra a b = (
   a -> a -> a, -- Pair
   b -> b -> Identifier -> a -> a, -- Fun
   a      -> a, -- Sigmoid  
-  a -> a -> a, -- Add
-  a -> a -> a, -- Mult
-  a -> a -> a, -- Dot
-  a -> a -> a, -- IntAdd
-  a -> a -> a, -- IntMult  
+  BinOp -> Maybe b -> a -> a -> a, -- BinOp  
   b -> a    -> a, -- New
   a           -> a, -- Length
   a -> a    -> a, -- Lookup
@@ -47,21 +43,17 @@ foldType (fReal, fInt, fArray, fPair, fFun) = fType
     fType (TFun t1 t2) = fFun (fType t1) (fType t2)
 
 foldTerm :: TermAlgebra a b -> Term -> a
-foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult,
-          fDot, fIntAdd, fIntMult, fNew, fLength, fLookup, fUpdate, fMap,
+foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp,
+          fNew, fLength, fLookup, fUpdate, fMap,
           fFold, fCase, fApply, aType) = fTerm where
     fTerm (Var x)            = fVar   x 
     fTerm (CReal n)          = fCReal n
     fTerm (CInt n)           = fCInt  n 
-    fTerm (CArray y ts)        = fCArray (fType y) (V.map fTerm ts)
+    fTerm (CArray y ts)      = fCArray (fType y) (V.map fTerm ts)
     fTerm (Pair t1 t2)       = fPair (fTerm t1) (fTerm t2)
     fTerm (Fun y1 y2 x t)    = fFun  (fType y1) (fType y2) x (fTerm t)
-    fTerm (Sigmoid t)    = fSigmoid  (fTerm t)
-    fTerm (Add t1 t2)    = fAdd  (fTerm t1) (fTerm t2)
-    fTerm (Mult t1 t2)   = fMult (fTerm t1) (fTerm t2)
-    fTerm (Dot t1 t2)    = fDot  (fTerm t1) (fTerm t2)
-    fTerm (IntAdd t1 t2) = fIntAdd  (fTerm t1) (fTerm t2)
-    fTerm (IntMult t1 t2)= fIntMult (fTerm t1) (fTerm t2)
+    fTerm (Sigmoid t)        = fSigmoid  (fTerm t)
+    fTerm (BinOp o y t1 t2)  = fBinOp o (fType <$> y) (fTerm t1) (fTerm t2)
     fTerm (New y t)          = fNew  (fType y)  (fTerm t)
     fTerm (Length t)         = fLength (fTerm t)
     fTerm (Lookup t1 t2)     = fLookup (fTerm t1) (fTerm t2)

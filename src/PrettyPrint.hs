@@ -12,7 +12,7 @@ instance Show Type where
     show (TPair y1 y2) = "<" ++ show y1 ++ ", " ++ show y2 ++ ">"
 
 instance Show Term where
-    show = foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fAdd, fMult, fDot, fAdd, fMult, fNew, fLength, fLookup, fUpdate, fMap, 
+    show = foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, fUpdate, fMap, 
         fFold, fCase, fApply,
         idTypeAlgebra) where
             fVar         = id
@@ -34,9 +34,9 @@ instance Show Term where
             fApply t1 t2     = t1 ++ " $$ " ++ t2
             
             -- Operators
-            fSigmoid t     = "sigmoid(" ++ t ++ ")"
-            fAdd t1 t2     = t1 ++ "+" ++ t2
-            fMult t1 t2    = t1 ++ "*" ++ t2
-            fDot t1 t2     = t1 ++ "@" ++ t2
+            fSigmoid t           = "sigmoid(" ++ t ++ ")"
+            fBinOp Add  _ t1 t2  = t1 ++ "+" ++ t2
+            fBinOp Mult _ t1 t2  = t1 ++ "*" ++ t2
+            fBinOp Dot  _ t1 t2  = t1 ++ "@" ++ t2
             
 

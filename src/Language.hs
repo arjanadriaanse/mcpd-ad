@@ -16,11 +16,7 @@ data Term = Var     Identifier
           | Pair    Term Term
           | Fun     Type Type Identifier Term
           | Sigmoid Term
-          | Add     Term Term
-          | Mult    Term Term
-          | Dot     Term Term
-          | IntAdd  Term Term
-          | IntMult Term Term
+          | BinOp   BinOp (Maybe Type) Term Term
           | New     Type Term
           | Length  Term
           | Lookup  Term Term
@@ -29,6 +25,10 @@ data Term = Var     Identifier
           | Fold    Term Term Term
           | Case    Term Identifier Identifier Term
           | Apply   Term Term
+
+data BinOp = Add | Mult | Dot
+
+
 
 class Pair a where
   ($*) :: a -> a -> a
@@ -40,8 +40,8 @@ instance Pair Term where
   ($*) = Pair
 
 instance Num Term where
-  (+)           = Add
-  (*)           = Mult
+  (+)           = BinOp Add Nothing
+  (*)           = BinOp Mult Nothing
   abs (CReal n) = CReal (abs n)
   abs _         = error "Not supported"
   signum (CReal n) = CReal (signum n)
@@ -82,13 +82,7 @@ sigmoid :: Term -> Term
 sigmoid = Sigmoid 
 
 dot :: Term -> Term -> Term
-dot = Dot
-
-iadd :: Term -> Term -> Term 
-iadd = IntAdd 
-
-imult :: Term -> Term -> Term 
-imult = IntMult 
+dot = BinOp Dot Nothing
 
 new :: Type -> Term -> Term
 new = New 

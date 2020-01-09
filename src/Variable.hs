@@ -40,8 +40,12 @@ type AlphaRenameState = (Int, M.Map Identifier Identifier)
 
 -- | Make all variable names unique
 alphaRename :: Term -> Term
-alphaRename t = evalState (foldTerm (fVar, return . CReal, return . CInt, \x y -> (liftM2 CArray) x (sequence y), liftM2 Pair, fFun, liftM Sigmoid, liftM2 Add, liftM2 Mult, liftM2 Dot, liftM2 IntAdd, liftM2 IntMult, liftM2 New, liftM Length, liftM2 Lookup, liftM3 Update, liftM2 Map,  liftM3 Fold, fCase, liftM2 Apply,
+alphaRename t = evalState (foldTerm (fVar, return . CReal, return . CInt, \x y -> (liftM2 CArray) x (sequence y), liftM2 Pair, 
+                fFun, liftM Sigmoid, fBinOp, liftM2 New, 
+                liftM Length, liftM2 Lookup, liftM3 Update, liftM2 Map,  liftM3 Fold, fCase, liftM2 Apply,
         (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun)) t) (0, M.empty) where
-  fVar x          = Var <$> gets ((M.! x) . snd)
-  fFun t1 t2 x e  = local $ Fun <$> t1 <*> t2 <*> declare x <*> e
-  fCase e1 x y e2 = local $ Case <$> e1 <*> declare x <*> declare y <*> e2
+  fVar x           = Var <$> gets ((M.! x) . snd)
+  fFun t1 t2 x e   = local $ Fun <$> t1 <*> t2 <*> declare x <*> e
+  fCase e1 x y e2  = local $ Case <$> e1 <*> declare x <*> declare y <*> e2
+  fBinOp o (Just t) e1 e2 = t >>= (\x -> BinOp <$> return o <*> return (Just x) <*> e1 <*> e2) -- TODO make Maybe-invariant
+  fBinOp o (Nothing) e1 e2 = BinOp <$> return o <*> return Nothing <*> e1 <*> e2 -- TODO make Maybe-invariant
