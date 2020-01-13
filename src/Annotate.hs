@@ -26,21 +26,29 @@ local command = do
 --envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
 
 annotate :: Term -> Term
-annotate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, 
-        (\x y -> (liftM2 CArray) x (sequence y)), 
-        liftM2 Pair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
+annotate t = fst . evalState (foldTerm (fVar, 
+        return . (, real) . CReal, 
+        return . (, int) . CInt, 
+        \x y -> (, array x) <$> (liftM (CArray x)) (sequence (mapM fst y)), 
+        fPair,
+        
+        fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
         fUpdate, fMap, fFold, fCase, fApply,
-        (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun)) t) M.empty where 
+        idTypeAlgebra) t) M.empty where 
   fVar x = do
-      v <- gets (envLookup x)
+      v <- gets (M.lookup x)
       case v of
         Nothing -> error "Variable not found"
-        (Just e) -> return e
+        (Just e) -> return (var x, e)
+  fPair f s = do
+      (e1, t1) <- f
+      (e2, t2) <- s
+      return (e1 $* e2, t1 $* t2) 
   fFun t1 t2 x e  =  local $ do
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      Fun <$> t1 <*> t2 <*> return x <*> return (error "Function cannot be evaluated")
+      Fun t1 t2 x <*> return (error "Function cannot be evaluated")
   fCase pairexp x y exp2 = local $ do
       pair <- pairexp
       -- put the variables in the environment and execute exp2
