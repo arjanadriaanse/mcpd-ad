@@ -31,10 +31,10 @@ envInsert :: Identifier -> Term -> MachineState -> MachineState
 envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
 
 evaluate :: Term -> Term 
-evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y -> (liftM2 CArray) x (sequence y)), 
+evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y -> liftM (CArray x) (sequence y)), 
         liftM2 Pair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
         fUpdate, fMap, fFold, fCase, fApply,
-        (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun)) t) defaultmachinestate where 
+        idTypeAlgebra) t) defaultmachinestate where 
   fVar x = do
       v <- gets (envLookup x)
       case v of
@@ -44,7 +44,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      Fun <$> t1 <*> t2 <*> return x <*> return (error "Function cannot be evaluated")
+      return $ Fun t1 t2 x (error "Function cannot be evaluated")
   fCase pairexp x y exp2 = local $ do
       pair <- pairexp
       -- put the variables in the environment and execute exp2
@@ -63,11 +63,10 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 body
   fNew t1 n = do 
       len  <- n 
-      t    <- t1
       case len of 
-          (CInt i) -> case t of 
-              TReal -> return $ CArray t (V.replicate i (CReal 0))
-              TInt  -> return $ CArray t (V.replicate i (CInt 0))
+          (CInt i) -> case t1 of 
+              TReal -> return $ CArray t1 (V.replicate i (CReal 0))
+              TInt  -> return $ CArray t1 (V.replicate i (CInt 0))
               -- TODO We need to specify length of inner arrays as well, to allocate 
               -- TArray inner -> return $ CArray inner (V.replicate i (fNew  ... ))
               _     -> error "type not supported"
