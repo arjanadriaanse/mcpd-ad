@@ -54,6 +54,11 @@ snd_ = fun [("in", realpair)]  ( case_ (var "in") "id1" "id2" (var "id2") , real
 examplePoly :: Term
 examplePoly = fun [("x", real)] ( (3 * (var "x" * var "x" * var "x")) + var "x" * 9 ,real)
 
+exampleLogReg :: Term
+exampleLogReg = fun [("x", array real), ("w", array real), "b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
+
+-- | How to do function composition without polymorphism?
+
 exampleSecondDerivative :: Term 
 exampleSecondDerivative =  (fun [("x", realpair)] (exampleSnd $$ ((differentiate examplePoly) $$ (var "x")), real)) -- ?? How to do it
 
