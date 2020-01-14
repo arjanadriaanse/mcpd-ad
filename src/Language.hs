@@ -117,5 +117,8 @@ case_ = Case
 ($.) :: Term -> Term -> Term
 ($.) = Comp
 
+fst_ :: Type -> Type -> Term
+fst_ tau1 tau2 = fun [("x", tau1 $* tau2)] (case_ (var "x") "y" "z" $ var "y", tau1) 
 
-
+snd_ :: Type -> Type -> Term
+snd_ tau1 tau2 = fun [("x", tau1 $* tau2)] (case_ (var "x") "y" "z" $ var "z", tau2)
