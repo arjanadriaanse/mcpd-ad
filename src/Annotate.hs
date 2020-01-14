@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-module AbstractMachine where
+module Annotate where
 import Language 
 import Algebra
 import qualified Data.Map.Strict as M
@@ -10,41 +10,45 @@ import Control.Monad.State.Strict
 import qualified Data.Vector as V
 import Data.Function (on)
 
-type Env = M.Map Identifier Term
-data MachineState = MachineState Env (State MachineState Term)
+type Env = M.Map Identifier Type
 
-
-local :: State MachineState a -> State MachineState a
+local :: State Env a -> State Env a
 local command = do
   MachineState e _ <- get
   result <- command
   modify $ \(MachineState _ f) -> MachineState e f
   return result
 
-defaultmachinestate :: MachineState
-defaultmachinestate = MachineState M.empty undefined
+--envLookup :: Identifier -> MachineState -> Maybe Term 
+--envLookup x (MachineState env _)  = M.lookup x env
 
-envLookup :: Identifier -> MachineState -> Maybe Term 
-envLookup x (MachineState env _)  = M.lookup x env
+--envInsert :: Identifier -> Term -> MachineState -> MachineState
+--envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
 
-envInsert :: Identifier -> Term -> MachineState -> MachineState
-envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
-
-evaluate :: Term -> Term 
-evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y -> liftM (CArray x) (sequence y)), 
-        liftM2 Pair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
+annotate :: Term -> Term
+annotate t = fst . evalState (foldTerm (fVar, 
+        return . (, real) . CReal, 
+        return . (, int) . CInt, 
+        \x y -> (, array x) <$> (liftM (CArray x)) (sequence (mapM fst y)), 
+        fPair,
+        
+        fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
         fUpdate, fMap, fFold, fCase, fApply,
-        idTypeAlgebra) t) defaultmachinestate where 
+        idTypeAlgebra) t) M.empty where 
   fVar x = do
-      v <- gets (envLookup x)
+      v <- gets (M.lookup x)
       case v of
         Nothing -> error "Variable not found"
-        (Just e) -> return e
+        (Just e) -> return (var x, e)
+  fPair f s = do
+      (e1, t1) <- f
+      (e2, t2) <- s
+      return (e1 $* e2, t1 $* t2) 
   fFun t1 t2 x e  =  local $ do
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      return $ Fun t1 t2 x (error "Function cannot be evaluated")
+      Fun t1 t2 x <*> return (error "Function cannot be evaluated")
   fCase pairexp x y exp2 = local $ do
       pair <- pairexp
       -- put the variables in the environment and execute exp2
@@ -63,10 +67,11 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 body
   fNew t1 n = do 
       len  <- n 
+      t    <- t1
       case len of 
-          (CInt i) -> case t1 of 
-              TReal -> return $ CArray t1 (V.replicate i (CReal 0))
-              TInt  -> return $ CArray t1 (V.replicate i (CInt 0))
+          (CInt i) -> case t of 
+              TReal -> return $ CArray t (V.replicate i (CReal 0))
+              TInt  -> return $ CArray t (V.replicate i (CInt 0))
               -- TODO We need to specify length of inner arrays as well, to allocate 
               -- TArray inner -> return $ CArray inner (V.replicate i (fNew  ... ))
               _     -> error "type not supported"
