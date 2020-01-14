@@ -84,6 +84,11 @@ typecheck e (Map f t) = do
   case tauF of
     TFun tau1 tau2 -> typecheck e t >>= unify (TArray tau1) >> Right (TArray tau2)
     _              -> Left $ NonFunction tauF
+typecheck e (ZipWith f t1 t2) = do
+  tauF <- typecheck e f
+  case tauF of
+    TFun tau1 (TFun tau2 tau3) -> typecheck e t1 >>= unify (TArray tau1) >> typecheck e t2 >>= unify (TArray tau2) >> Right (TArray tau3)
+    _                          -> Left $ NonFunction tauF
 typecheck e (Fold f v t) = do
   tauF <- typecheck e f
   case tauF of
@@ -104,3 +109,10 @@ typecheck e (Apply t1 t2) = do
   case tauF of
     TFun tau1 tau2 -> typecheck e t2 >>= unify tau1 >> Right tau2
     _              -> Left $ NonFunction tauF
+typecheck e (Comp t1 t2) = do
+  tauF1 <- typecheck e t1
+  tauF2 <- typecheck e t2
+  case (tauF1, tauF2) of
+    (TFun tau3 tau4, TFun tau1 tau2) -> unify tau2 tau3 >> Right $ TFun tau1 tau4
+    (TFun _ _, _)                    -> NonFunction $ tauF2
+    _                                -> NonFunction $ tauF1
