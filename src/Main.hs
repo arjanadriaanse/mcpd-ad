@@ -45,17 +45,15 @@ exampleNested = f $$ 10 $$ 5 $$ 3
 -- 9  + 9x^2 
 -- 18x      
 
-realpair = TPair real real 
+
 exampleSnd :: Term
 exampleSnd = fun [("pair", TPair realpair realpair)] ( case_ (var "pair") "id1" "id2" (var "id2") , realpair)
-
-snd_ = fun [("in", realpair)]  ( case_ (var "in") "id1" "id2" (var "id2") , real)
 
 examplePoly :: Term
 examplePoly = fun [("x", real)] ( (3 * (var "x" * var "x" * var "x")) + var "x" * 9 ,real)
 
 exampleLogReg :: Term
-exampleLogReg = fun [("x", array real), ("w", array real), "b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
+exampleLogReg = fun [("x", array real), ("w", array real), ("b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
 
 -- | How to do function composition without polymorphism?
 
@@ -63,7 +61,9 @@ exampleSecondDerivative :: Term
 exampleSecondDerivative =  (fun [("x", realpair)] (exampleSnd $$ ((differentiate examplePoly) $$ (var "x")), real)) -- ?? How to do it
 
 exampleFromPaper :: Term 
-exampleFromPaper = fun [("x", real), ("y", real)] (snd_ $$ inner, real) where 
+exampleFromPaper = fun [("x", real), ("y", real)] (snd_ real real $$ inner, real) where 
     inner    = (differentiate innerfun) $$ ((var "x") $* 1)
-    innerfun = (var "x") * (snd_ $$ dfy )
+    innerfun = (var "x") * ( snd_ real real $$ dfy )
     dfy      = (differentiate (var "x" + var "y")) $$ ((var "y") $* 1)
+
+
