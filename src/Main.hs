@@ -62,3 +62,4 @@ exampleFromPaper = fun [("x", real), ("y", real)] (snd_ $$ inner, real) where
     inner    = (differentiate innerfun) $$ ((var "x") $* 1)
     innerfun = (var "x") * (snd_ $$ dfy )
     dfy      = (differentiate (var "x" + var "y")) $$ ((var "y") $* 1)
+

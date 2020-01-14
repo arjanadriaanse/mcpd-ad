@@ -14,7 +14,7 @@ type TermAlgebra a b = (
   Identifier  -> a, -- Var
   Double      -> a, -- CReal
   Int         -> a, -- CInt
-  b -> V.Vector a     -> a, -- CArray
+  b -> V.Vector a -> a, -- CArray
   a -> a -> a, -- Pair
   b -> b -> Identifier -> a -> a, -- Fun
   a      -> a, -- Sigmoid  
@@ -24,9 +24,11 @@ type TermAlgebra a b = (
   a -> a    -> a, -- Lookup
   a -> a -> a -> a, -- Update
   a -> a      -> a, -- Map
+  a -> a -> a -> a, -- ZipWith
   a -> a -> a -> a, -- Fold  
   a -> Identifier -> Identifier -> a -> a, -- Case
   a -> a      -> a, -- Apply
+  a -> a      -> a, -- Comp
   TypeAlgebra b
   )
 
@@ -44,8 +46,8 @@ foldType (fReal, fInt, fArray, fPair, fFun) = fType
 
 foldTerm :: TermAlgebra a b -> Term -> a
 foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp,
-          fNew, fLength, fLookup, fUpdate, fMap,
-          fFold, fCase, fApply, aType) = fTerm where
+          fNew, fLength, fLookup, fUpdate, fMap, fZipWith,
+          fFold, fCase, fApply, fComp, aType) = fTerm where
     fTerm (Var x)            = fVar   x 
     fTerm (CReal n)          = fCReal n
     fTerm (CInt n)           = fCInt  n 
@@ -59,8 +61,10 @@ foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp,
     fTerm (Lookup t1 t2)     = fLookup (fTerm t1) (fTerm t2)
     fTerm (Update t1 t2 t3)  = fUpdate (fTerm t1) (fTerm t2) (fTerm t3)
     fTerm (Map t1 t2)        = fMap (fTerm t1) (fTerm t2)
+    fTerm (ZipWith f t1 t2)  = fZipWith (fTerm f) (fTerm t1) (fTerm t2)
     fTerm (Fold t1 t2 t3)    = fFold (fTerm t1) (fTerm t2) (fTerm t3)
     fTerm (Case t1 x1 x2 t2) = fCase (fTerm t1) x1 x2 (fTerm t2)
     fTerm (Apply t1 t2)      = fApply (fTerm t1) (fTerm t2)
+    fTerm (Comp f1 f2)       = fComp (fTerm f1) (fTerm f2)
     -- Algebra
     fType                = foldType aType

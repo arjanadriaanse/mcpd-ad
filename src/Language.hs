@@ -23,9 +23,11 @@ data Term = Var     Identifier
           | Lookup  Term Term
           | Update  Term Term Term
           | Map     Term Term
+          | ZipWith Term Term Term 
           | Fold    Term Term Term
           | Case    Term Identifier Identifier Term
           | Apply   Term Term
+          | Comp    Term Term 
 
 data BinOp = Add | Mult | Dot
 
@@ -103,11 +105,17 @@ map_ = Map
 fold :: Term -> Term -> Term -> Term 
 fold = Fold
 
+zipwith :: Term -> Term -> Term -> Term 
+zipwith = ZipWith
+
 case_ :: Term -> Identifier -> Identifier -> Term -> Term 
 case_ = Case 
 
 ($$) :: Term -> Term -> Term
 ($$) = Apply
+
+($.) :: Term -> Term -> Term
+($.) = Comp
 
 
 

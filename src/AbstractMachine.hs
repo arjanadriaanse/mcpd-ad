@@ -33,7 +33,7 @@ envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
 evaluate :: Term -> Term 
 evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y -> liftM (CArray x) (sequence y)), 
         liftM2 Pair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
-        fUpdate, fMap, fFold, fCase, fApply,
+        fUpdate, fMap, fZipWith, fFold, fCase, fApply, fComp,
         idTypeAlgebra) t) defaultmachinestate where 
   fVar x = do
       v <- gets (envLookup x)
@@ -92,6 +92,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           ((Fun _ t2 _ _), (CArray _ vec )) -> do 
                 newvec <- V.mapM (fApply f) (V.map return vec)
                 return $ CArray t2 newvec
+  fZipWith f t1 t2 = undefined
   fFold f b a = do 
       func  <- f 
       array <- a 
@@ -100,6 +101,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (CArray _ vec ) -> do 
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
                 return result
+  fComp f1 f2   = undefined
   fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
   fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
   fBinOp Add t  = operatorBin (+) t -- todo: elementwise

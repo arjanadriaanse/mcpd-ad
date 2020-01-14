@@ -7,7 +7,7 @@ import Variable
 differentiate :: Term -> Term
 differentiate = foldTerm
   (Var, fCReal, CInt, CArray, Pair, Fun, fSigmoid, fBinOp,
-    New, Length, Lookup, Update, Map, Fold, Case, Apply,
+    New, Length, Lookup, Update, Map, ZipWith, Fold, Case, Apply, Comp,
    (fTReal, TInt, TArray, TPair, TFun)) . alphaRename where
   fTReal                            = real $* real
   fCReal n                          = CReal n $* 0

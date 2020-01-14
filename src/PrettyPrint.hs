@@ -12,8 +12,9 @@ instance Show Type where
     show (TPair y1 y2) = "<" ++ show y1 ++ ", " ++ show y2 ++ ">"
 
 instance Show Term where
-    show = foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, fUpdate, fMap, 
-        fFold, fCase, fApply,
+    show = foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp, fNew, 
+        fLength, fLookup, fUpdate, fMap, fZipWith,
+        fFold, fCase, fApply, fComp,
         idTypeAlgebra) where
             fVar         = id
             fCReal       = show
@@ -29,9 +30,11 @@ instance Show Term where
             fUpdate t1 t2 t3 = t1 ++ "[" ++ t2 ++ "] := " ++ t3
             fLength t1       = "len " ++ t1 ++ ""
             fMap t1 t2       = "map " ++ t1 ++ " " ++ t2
+            fZipWith f t1 t2 = error "n"
             fFold t1 t2 t3   = "fold " ++ t1 ++ " " ++ t2 ++ " " ++ t3
             fFun y1 y2 x t   = "(fun : (" ++ show (TFun y1 y2) ++ ") " ++ x ++ " . " ++ t ++")"
             fApply t1 t2     = t1 ++ " $$ " ++ t2
+            fComp t1 t2      = error "n"
             
             -- Operators
             fSigmoid t           = "sigmoid(" ++ t ++ ")"
