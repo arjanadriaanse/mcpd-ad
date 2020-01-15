@@ -92,7 +92,14 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           ((Fun _ t2 _ _), (CArray _ vec )) -> do 
                 newvec <- V.mapM (fApply f) (V.map return vec)
                 return $ CArray t2 newvec
-  fZipWith f t1 t2 = undefined
+  fZipWith f t1 t2 = do
+      func <- f 
+      array1 <- t1
+      array2 <- t2 
+      case (func, array1, array2) of 
+          ((Fun _ t2 _ _), (CArray _ vec1 ), (CArray _ vec2 )) -> do 
+              newvec <- V.zipWithM (\x y -> fApply (fApply f (return y)) (return x) )  vec1 vec2 
+              return $ CArray t2 newvec
   fFold f b a = do 
       func  <- f 
       array <- a 

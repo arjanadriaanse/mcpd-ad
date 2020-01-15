@@ -3,7 +3,7 @@ module Main where
 import Language
 import Forward
 import PrettyPrint
-import StaticCheck
+--import StaticCheck
 import Variable
 import AbstractMachine
 
@@ -45,7 +45,7 @@ exampleNested = f $$ 10 $$ 5 $$ 3
 -- 9  + 9x^2 
 -- 18x      
 
-
+realpair = real $* real
 exampleSnd :: Term
 exampleSnd = fun [("pair", TPair realpair realpair)] ( case_ (var "pair") "id1" "id2" (var "id2") , realpair)
 
@@ -66,4 +66,8 @@ exampleFromPaper = fun [("x", real), ("y", real)] (snd_ real real $$ inner, real
     innerfun = (var "x") * ( snd_ real real $$ dfy )
     dfy      = (differentiate (var "x" + var "y")) $$ ((var "y") $* 1)
 
+
+exampleZip :: Term 
+exampleZip = zipwith f exampleMap exampleMap where 
+    f = fun [("x", real), ("y", real)] ( var "x" - (2 * var "y") , real )
 
