@@ -131,12 +131,20 @@ operatorUn op n = do
     case r1 of 
         (CReal c1) -> return (CReal (op c1))
         (CInt c1)  -> return (CReal (op (fromIntegral c1)))
+        (CArray t c1) -> return (CArray t (V.map (\(CReal x) -> CReal (op x)) c1))
+
+
+-- helper function for elementwise adding
+unpackBinOp op = (\(CReal x) -> \(CReal y) -> CReal (op x y ))
 
 operatorBin op t n1 n2 = do 
     r1 <- n1 
     r2 <- n2
     case (r1,r2) of 
         (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
+        (CArray t c1, CArray _ c2) -> return (CArray t (V.zipWith (unpackBinOp op) c1 c2))
+        (CArray t c1, CReal c2) -> return (CArray t (V.map (\(CReal x) -> CReal (op x c2)) c1))
+        (CReal c1, CArray t c2) -> return (CArray t (V.map (\(CReal x) -> CReal (op c1 x)) c2))
 
 dotProduct fMult fAdd n1 n2 = do 
     v1 <- n1 

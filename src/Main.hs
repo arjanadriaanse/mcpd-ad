@@ -84,3 +84,10 @@ comptesting func1 func2 = case (func1, func2) of
           ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> result where 
               result = Fun tf11 tf22 id1 body 
               body   = let_ id2 (body1, tf12) (body2, tf22)
+
+
+exampleElementWise :: Term 
+exampleElementWise = exampleMap + exampleMap 
+
+exampleElementWise2 :: Term 
+exampleElementWise2 = 1 - (exampleMap * 0.01)
