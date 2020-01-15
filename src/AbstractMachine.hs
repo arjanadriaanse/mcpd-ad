@@ -9,6 +9,7 @@ import Control.Monad
 import Control.Monad.State.Strict
 import qualified Data.Vector as V
 import Data.Function (on)
+import PrettyPrint
 
 type Env = M.Map Identifier Term
 data MachineState = MachineState Env (State MachineState Term)
@@ -38,13 +39,13 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
   fVar x = do
       v <- gets (envLookup x)
       case v of
-        Nothing -> error "Variable not found"
+        Nothing -> error ("Variable " ++ x ++  " not found")
         (Just e) -> return e
-  fFun t1 t2 x e  =  local $ do
+  fFun t1 t2 x e  = local $ do
       -- Evaluating a function definition results in nothing
       -- put the function body in the monad
       modify (\(MachineState env _) -> (MachineState env e))
-      return $ Fun t1 t2 x (error "Function cannot be evaluated")
+      return $ Fun t1 t2 x (error ("Function cannot be evaluated"))
   fCase pairexp x y exp2 = local $ do
       pair <- pairexp
       -- put the variables in the environment and execute exp2
@@ -108,7 +109,16 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
           (CArray _ vec ) -> do 
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
                 return result
-  fComp f1 f2   = undefined
+  --                b -> c  a -> b              
+  -- f1 $. f2    =  f2 ( f1 )
+  fComp f1 f2   = do 
+      func1 <- f1 
+      func2 <- f2 
+      case (func1, func2) of 
+          ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> result where 
+              body   =  (fun [(id2, tf21)] (body2, tf22)) $$ ( body1)
+              result = fFun tf11 tf22 id1 (return body) 
+              
   fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
   fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
   fBinOp Add t  = operatorBin (+) t -- todo: elementwise

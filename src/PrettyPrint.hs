@@ -34,7 +34,7 @@ instance Show Term where
             fFold t1 t2 t3   = "fold " ++ t1 ++ " " ++ t2 ++ " " ++ t3
             fFun y1 y2 x t   = "(fun : (" ++ show (TFun y1 y2) ++ ") " ++ x ++ " . " ++ t ++")"
             fApply t1 t2     = t1 ++ " $$ " ++ t2
-            fComp t1 t2      = error "n"
+            fComp t1 t2      = t1 ++ " $. " ++ t2
             
             -- Operators
             fSigmoid t           = "sigmoid(" ++ t ++ ")"
