@@ -98,9 +98,9 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       array1 <- t1
       array2 <- t2 
       case (func, array1, array2) of 
-          ((Fun _ t2 _ _), (CArray _ vec1 ), (CArray _ vec2 )) -> do 
+          ((Fun _ (TFun _ het_type) _ _), (CArray  _ vec1 ), (CArray _ vec2 )) -> do 
               newvec <- V.zipWithM (\x y -> fApply (fApply f (return y)) (return x) )  vec1 vec2 
-              return $ CArray t2 newvec
+              return $ CArray het_type newvec
   fFold f b a = do 
       func  <- f 
       array <- a 
@@ -108,16 +108,15 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       case array of 
           (CArray _ vec ) -> do 
                 result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
-                return result
-  --                b -> c  a -> b              
-  -- f1 $. f2    =  f2 ( f1 )
-  fComp f1 f2   = do 
+                return result          
+  -- (f1 $. f2) x    =  f1 ( f2 x )
+  fComp f2 f1   = do 
       func1 <- f1 
       func2 <- f2 
       case (func1, func2) of 
-          ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> result where 
-              body   =  (fun [(id2, tf21)] (body2, tf22)) $$ ( body1)
-              result = fFun tf11 tf22 id1 (return body) 
+          ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> return result where 
+              body   = (fun [(id2, tf21)] (body2, tf22)) $$ ( body1)
+              result = Fun tf11 tf22 id1 body
               
   fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
   fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
