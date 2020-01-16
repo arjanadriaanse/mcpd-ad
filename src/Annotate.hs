@@ -5,129 +5,78 @@ module Annotate where
 import Language 
 import Algebra
 import qualified Data.Map.Strict as M
-import Control.Monad
 import Control.Monad.State.Strict
-import qualified Data.Vector as V
-import Data.Function (on)
 
 type Env = M.Map Identifier Type
 
 local :: State Env a -> State Env a
 local command = do
-  MachineState e _ <- get
+  e <- get
   result <- command
-  modify $ \(MachineState _ f) -> MachineState e f
+  put e
   return result
 
---envLookup :: Identifier -> MachineState -> Maybe Term 
---envLookup x (MachineState env _)  = M.lookup x env
-
---envInsert :: Identifier -> Term -> MachineState -> MachineState
---envInsert x e (MachineState env t) = MachineState (M.insert x e env) t
-
 annotate :: Term -> Term
-annotate t = fst . evalState (foldTerm (fVar, 
-        return . (, real) . CReal, 
-        return . (, int) . CInt, 
-        \x y -> (, array x) <$> (liftM (CArray x)) (sequence (mapM fst y)), 
-        fPair,
-        
-        fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
-        fUpdate, fMap, fFold, fCase, fApply,
-        idTypeAlgebra) t) M.empty where 
+annotate tm = snd $ evalState (foldTerm (fVar, 
+        return . (,) real . CReal, 
+        return . (,) int . CInt, 
+        fCArray, fPair, fFun, fSigmoid, fBinOp, fNew, fLength, fLookup, 
+        fUpdate, fMap, fZipWith, fFold, fCase, fApply, fComp,
+        idTypeAlgebra) tm) M.empty where 
   fVar x = do
-      v <- gets (M.lookup x)
-      case v of
-        Nothing -> error "Variable not found"
-        (Just e) -> return (var x, e)
+    t <- gets (M.! x)
+    return (t, var x)
+  fCArray t a = (,) (array t) . CArray t . fmap snd <$> sequence a
   fPair f s = do
-      (e1, t1) <- f
-      (e2, t2) <- s
-      return (e1 $* e2, t1 $* t2) 
-  fFun t1 t2 x e  =  local $ do
-      -- Evaluating a function definition results in nothing
-      -- put the function body in the monad
-      modify (\(MachineState env _) -> (MachineState env e))
-      Fun t1 t2 x <*> return (error "Function cannot be evaluated")
-  fCase pairexp x y exp2 = local $ do
-      pair <- pairexp
-      -- put the variables in the environment and execute exp2
-      case pair of 
-          (Pair p1 p2) -> do
-            modify (envInsert y p2 . envInsert x p1)
-            exp2
-          _ -> error ("No pair provided")
-  fApply e1 e2 = do 
-        arg  <- e2
-        func <- e1
-        case func of 
-            (Fun _ _ x _) -> do
-                modify (envInsert x arg)
-                body <- gets (\(MachineState _ val) -> val)
-                body
-  fNew t1 n = do 
-      len  <- n 
-      t    <- t1
-      case len of 
-          (CInt i) -> case t of 
-              TReal -> return $ CArray t (V.replicate i (CReal 0))
-              TInt  -> return $ CArray t (V.replicate i (CInt 0))
-              -- TODO We need to specify length of inner arrays as well, to allocate 
-              -- TArray inner -> return $ CArray inner (V.replicate i (fNew  ... ))
-              _     -> error "type not supported"
-  fLength e  = do
-      array <- e  
-      case array of 
-          (CArray _ a ) -> return $ CInt (V.length a)
-  fLookup e i = do 
-      index <- i 
-      array <- e 
-      case (index, array) of 
-          ((CInt i), (CArray _ a)) -> return $ ( a V.! i )
-  fUpdate a i v = do 
-       array <- a 
-       index <- i 
-       value <- v
-       case (index, array) of
-          ((CInt c), (CArray t ar)) -> return $ CArray t ( (V.//) ar [(c, value)] )
-  fMap f a = do 
-      func  <- f 
-      array <- a 
-      case (func, array) of 
-          ((Fun _ t2 _ _), (CArray _ vec )) -> do 
-                newvec <- V.mapM (fApply f) (V.map return vec)
-                return $ CArray t2 newvec
-  fFold f b a = do 
-      func  <- f 
-      array <- a 
-      start <- b 
-      case array of 
-          (CArray _ vec ) -> do 
-                result <- V.foldM (\x y -> fApply (fApply f (return y)) (return x) ) start vec
-                return result
-  fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
-  fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
-  fBinOp Add t  = operatorBin (+) t -- todo: elementwise
-  fBinOp Mult t = operatorBin (*) t
-
-
-
-operatorUn op n = do 
-    r1 <- n
-    case r1 of 
-        (CReal c1) -> return (CReal (op c1))
-        (CInt c1)  -> return (CReal (op (fromIntegral c1)))
-
-operatorBin op t n1 n2 = do 
-    r1 <- n1 
-    r2 <- n2
-    case (r1,r2) of 
-        (CReal c1, CReal c2)  -> return (CReal (op c1 c2))
-
-dotProduct fMult fAdd n1 n2 = do 
-    v1 <- n1 
-    v2 <- n2 
-    case (v1, v2) of 
-        ((CArray _ vec1), CArray _ vec2) -> do
-             (V.zipWithM (fMult `on` return) vec1 vec2 ) >>= V.foldM (fAdd `on` return) 0
-
+      (t1, e1) <- f
+      (t2, e2) <- s
+      return (t1 $* t2, e1 $* e2) 
+  fFun t1 t2 x e  =  local $ modify (M.insert x t1) >>
+      (,) (TFun t1 t2) . Fun t1 t2 x . snd <$> e
+  fCase e x y b = local $ do
+    (~(TPair t1 t2), ep) <- e
+    modify (M.insert y t2 . M.insert x t1)
+    (t, eb) <- b
+    return (t, Case ep x y eb)
+  fApply f e = do
+    (~(TFun _ t), ef) <- f
+    (_, ee) <- e
+    return (t, Apply ef ee)
+  fComp f1 f2 = do
+    (~(TFun _ t2), ef1) <- f1
+    (~(TFun t1 _), ef2) <- f2
+    return (TFun t1 t2, Comp ef1 ef2)
+  fNew t1 n = (,) (array t1) . New t1 . snd <$> n
+  fLength e = (,) int . Length . snd <$> e
+  fLookup e i = do
+    (~(TArray t), ee) <- e
+    (_, ei) <- i
+    return (t, Lookup ee ei)
+  fUpdate e i v = do
+    (t, ee) <- e
+    (_, ei) <- i
+    (_, ev) <- v
+    return (t, Update ee ei ev)
+  fMap f e = do
+    (~(TFun _ t), ef) <- f
+    (_, ee) <- e
+    return (TArray t, Map ef ee)
+  fZipWith f e1 e2 = do
+    (~(TFun _ (TFun _ t)), ef) <- f
+    (_, ee1) <- e1
+    (_, ee2) <- e2
+    return (TArray t, ZipWith ef ee1 ee2)
+  fFold f v e = do
+    (_, ef) <- f
+    (t, ev) <- v
+    (_, ee) <- e
+    return (t, Fold ef ev ee)
+  fSigmoid t = (,) real . Sigmoid . snd <$> t
+  fBinOp Dot _ e1 e2 = do
+    (_, ee1) <- e1
+    (_, ee2) <- e2
+    return (real, BinOp Dot (Just $ array real) ee1 ee2)
+  fBinOp o _ e1 e2 = do
+    (t, ee1) <- e1
+    (_, ee2) <- e2
+    return (t, BinOp o (Just t) ee1 ee2)
