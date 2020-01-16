@@ -113,6 +113,6 @@ typecheck e (Comp t1 t2) = do
   tauF1 <- typecheck e t1
   tauF2 <- typecheck e t2
   case (tauF1, tauF2) of
-    (TFun tau3 tau4, TFun tau1 tau2) -> unify tau2 tau3 >> Right $ TFun tau1 tau4
-    (TFun _ _, _)                    -> NonFunction $ tauF2
-    _                                -> NonFunction $ tauF1
+    (TFun tau3 tau4, TFun tau1 tau2) -> unify tau2 tau3 >> (Right $ TFun tau1 tau4)
+    (TFun _ _, _)                    -> Left $ NonFunction tauF2
+    _                                -> Left $ NonFunction tauF1

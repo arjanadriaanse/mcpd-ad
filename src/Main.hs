@@ -3,9 +3,10 @@ module Main where
 import Language
 import Forward
 import PrettyPrint
---import StaticCheck
+import StaticCheck
 import Variable
 import AbstractMachine
+import Annotate
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
@@ -62,9 +63,9 @@ exampleSecondDerivative =  (fun [("x", realpair)] (exampleSnd $$ ((differentiate
 
 exampleFromPaper :: Term 
 exampleFromPaper = fun [("x", real), ("y", real)] (snd_ real real $$ inner, real) where 
-    inner    = (differentiate innerfun) $$ ((var "x") $* 1)
+    inner    = ((differentiate . annotate) innerfun) $$ ((var "x") $* 1)
     innerfun = (var "x") * ( snd_ real real $$ dfy )
-    dfy      = (differentiate (var "x" + var "y")) $$ ((var "y") $* 1)
+    dfy      = ((differentiate . annotate) (var "x" + var "y")) $$ ((var "y") $* 1)
 
 
 exampleZip :: Term 
