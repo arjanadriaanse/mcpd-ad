@@ -7,6 +7,7 @@ import StaticCheck
 import Variable
 import AbstractMachine
 import Annotate
+import Test
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
