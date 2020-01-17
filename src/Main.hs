@@ -2,6 +2,7 @@ module Main where
 
 import Language
 import Forward
+import Backward
 import PrettyPrint
 import StaticCheck
 import Variable
@@ -15,7 +16,7 @@ main = putStrLn "Hello, Haskell!"
 example :: Term
 example = df $$ (10 $* 1)
     where
-        df = differentiate $ fun [("y", real)] (var "y" * var "y" + var "y", real)
+        df = (differentiateB 1 . annotate) $ fun [("y", real)] (var "y" * var "y" + var "y", real)
 
 exampleNest :: Term 
 exampleNest = fun [("y", real)] (f $$ 20, real) $$ 8000
