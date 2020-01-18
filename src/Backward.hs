@@ -48,4 +48,5 @@ addTuple = fun [("x",real $* real), ("y", real $* real )] (case_ (var "x") "b0" 
 
 -- | Actually evaluating a reverse mode derivative representation
 -- Unsure if this has type (real,real) (evR in paper)
-evalReverse = fun [("result", real)] (case_ (var "result") "x" "x'" (var "x" $* (var "x'" $$ 1) ), real $* real)
+evalReverse :: Term
+evalReverse = fun [("result", real $* (TFun UnknownType real))] (case_ (var "result") "x" "x'" ((var "x") $* ((var "x'") $$ 1) ), real $* real)
