@@ -7,7 +7,8 @@ type TypeAlgebra a = (
   a, -- TInt
   a -> a, -- TArray
   a -> a -> a, -- TPair
-  a -> a -> a -- TFun
+  a -> a -> a, -- TFun
+  a -- Unknown type
   )
 
 type TermAlgebra a b = (
@@ -33,16 +34,17 @@ type TermAlgebra a b = (
   )
 
 idTypeAlgebra :: TypeAlgebra Type
-idTypeAlgebra = (TReal, TInt, TArray, TPair, TFun)
+idTypeAlgebra = (TReal, TInt, TArray, TPair, TFun, UnknownType)
 
 foldType :: TypeAlgebra a -> Type -> a
-foldType (fReal, fInt, fArray, fPair, fFun) = fType
+foldType (fReal, fInt, fArray, fPair, fFun, fUnknown) = fType
   where
     fType TReal = fReal
     fType TInt = fInt
     fType (TPair t1 t2) = fPair (fType t1) (fType t2)
     fType (TArray t) = fArray (fType t)
     fType (TFun t1 t2) = fFun (fType t1) (fType t2)
+    fType UnknownType  = fUnknown
 
 foldTerm :: TermAlgebra a b -> Term -> a
 foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp,

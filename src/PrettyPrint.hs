@@ -10,6 +10,7 @@ instance Show Type where
     show (TArray y)    = "[" ++ show y ++ "]" 
     show (TFun y1 y2)  = "(" ++ show y1 ++ " -> " ++ show y2 ++ ")"
     show (TPair y1 y2) = "<" ++ show y1 ++ ", " ++ show y2 ++ ">"
+    show UnknownType   = "?"
 
 instance Show Term where
     show = foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp, fNew, 

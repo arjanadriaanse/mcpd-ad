@@ -13,8 +13,13 @@ import Test
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
 
+-- This doesnt even work
+exampleSmol :: Term 
+exampleSmol = evalReverse $$ exampleSmol where 
+    df = (differentiateB 1 . annotate) 10 -- + 2
+
 example :: Term
-example = df $$ (10 $* 1)
+example = evalReverse $$ df
     where
         df = (differentiateB 1 . annotate) $ fun [("y", real)] (var "y" * var "y" + var "y", real)
 
@@ -42,11 +47,7 @@ examplef = fold f 0 exampleMap where
 exampleNested :: Term
 exampleNested = f $$ 10 $$ 5 $$ 3
     where 
-        f = fun [("x", real),("y", real), ("z", real)] (var "x" * (var "y" + var "z"), real) 
-
--- 9x + 3x^3 
--- 9  + 9x^2 
--- 18x      
+        f = fun [("x", real),("y", real), ("z", real)] (var "x" * (var "y" + var "z"), real)  
 
 realpair = real $* real
 exampleSnd :: Term

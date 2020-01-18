@@ -9,6 +9,10 @@ import Control.Monad
 
 type Env = M.Map String Type
 
+-- | Typecheck wrapper
+typecheckWrapper :: Term -> Either TypeError Type
+typecheckWrapper = typecheck M.empty 
+
 -- | Set of types that are supported by the binary operators
 binOpTypes :: S.Set Type
 binOpTypes = S.fromList [TReal, TArray TReal, TInt]

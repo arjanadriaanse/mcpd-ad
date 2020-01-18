@@ -6,6 +6,7 @@ data Type = TReal
           | TArray Type
           | TPair  Type Type
           | TFun   Type Type
+          | UnknownType
           deriving (Eq, Ord)
 
 type Identifier = String

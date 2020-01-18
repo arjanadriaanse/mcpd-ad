@@ -48,7 +48,7 @@ alphaRename t = evalState (foldTerm (fVar, return . CReal, return . CInt, \x y -
                 fFun, liftM Sigmoid, fBinOp, liftM2 New, 
                 liftM Length, liftM2 Lookup, liftM3 Update, liftM2 Map, liftM3 ZipWith,
                 liftM3 Fold, fCase, liftM2 Apply, liftM2 Comp,
-        (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun)) t) (0, M.empty) where
+        (return TReal, return TInt, liftM TArray, liftM2 TPair, liftM2 TFun, return UnknownType)) t) (0, M.empty) where
   fVar x                   = Var <$> rename x
   fFun t1 t2 x e           = local $ Fun <$> t1 <*> t2 <*> declare x <*> e
   fCase e1 x y e2          = local $ Case <$> e1 <*> declare x <*> declare y <*> e2
