@@ -111,12 +111,11 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 return result          
   -- (f1 $. f2) x    =  f1 ( f2 x )
   fComp f2 f1   = do 
-      func1 <- f1 
-      func2 <- f2 
-      case (func1, func2) of 
-          ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> return result where 
-              body   = (fun [(id2, tf21)] (body2, tf22)) $$ ( body1)
-              result = Fun tf11 tf22 id1 body
+      ef1 <- f1
+      (MachineState _ b) <- get
+      ef2 <- f2
+      case (ef1, ef2) of 
+          ((Fun t1 _ id _), (Fun _ t2 _ _)) -> fFun t1 t2 id (fApply f2 b)
               
   fSigmoid      = operatorUn (\z -> 1 / (1 + exp(-z)))
   fBinOp Dot t  = dotProduct (fBinOp Mult t ) (fBinOp Add t)
