@@ -93,8 +93,8 @@ new = New
 length_ :: Term -> Term 
 length_ = Length 
 
-lookup :: Term -> Term -> Term
-lookup = Lookup 
+lookup_ :: Term -> Term -> Term
+lookup_ = Lookup 
 
 update :: Term -> Term -> Term -> Term 
 update = Update 

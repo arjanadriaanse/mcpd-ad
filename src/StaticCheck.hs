@@ -45,7 +45,7 @@ typecheck e (Var x) = case M.lookup x e of
                         _        -> Left $ UnknownVariable x
 typecheck _ (CReal _) = Right TReal
 typecheck _ (CInt _)  = Right TInt
-typecheck e (CArray tau ts) = traverse (typecheck e) ts >>= foldM unify tau
+typecheck e (CArray tau ts) = traverse (typecheck e) ts >>= foldM unify tau >> Right (TArray tau)
 typecheck e (Pair t1 t2) = TPair <$> typecheck e t1 <*> typecheck e t2
 typecheck e (Fun tau1 tau2 x t) = do
   tauBody <- typecheck (M.insert x tau1 e) t

@@ -116,8 +116,9 @@ addC t = fun [("x", t), ("y", t)] (var "x" + var "y", t)
 pairC :: Type -> Type -> Term
 pairC t1 t2 =  fun [("x", t1), ("y", t2)] (var "x" $* var "y", t1 $* t2)
 
---layer :: Int -> Term
---layer n = fun [("f", TFun ($* array real)
+layer :: Int -> Term
+layer n = fun [("f", TFun (array real) (TFun (array real) (TFun real real))), ("ws", array (array real)), ("bs", array real), ("x", array real)] (CArray real (V.fromList $ map g [0 .. n-1]), array real)
+  where g i = var "f" $$ var "x" $$ lookup_ (var "ws") (CInt i) $$ lookup_ (var "bs") (CInt i)
 
 exampleVectorField :: Term
 exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)
