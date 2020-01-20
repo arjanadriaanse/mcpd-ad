@@ -62,6 +62,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
                 modify (envInsert x arg)
                 body <- gets (\(MachineState _ val) -> val)
                 body
+            t -> error "application on non-function term"
   fNew t1 n = do 
       len  <- n 
       case len of 
@@ -99,7 +100,7 @@ evaluate t =  evalState (foldTerm (fVar, return . CReal, return . CInt, (\x y ->
       array2 <- t2 
       case (func, array1, array2) of 
           ((Fun _ (TFun _ het_type) _ _), (CArray  _ vec1 ), (CArray _ vec2 )) -> do 
-              newvec <- V.zipWithM (\x y -> fApply (fApply f (return y)) (return x) )  vec1 vec2 
+              newvec <- V.zipWithM (\x y -> fApply (fApply f (return x)) (return y) )  vec1 vec2 
               return $ CArray het_type newvec
   fFold f b a = do 
       func  <- f 
