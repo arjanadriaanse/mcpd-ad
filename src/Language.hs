@@ -1,5 +1,8 @@
 module Language where
-import qualified Data.Vector as V 
+import qualified Data.Vector as V
+import qualified Data.Map.Strict as M
+
+type Env = M.Map String Term
 
 data Type = TReal
           | TInt
@@ -23,11 +26,13 @@ data Term = Var     Identifier
           | Lookup  Term Term
           | Update  Term Term Term
           | Map     Term Term
-          | ZipWith Term Term Term 
+          | ZipWith Term Term Term
           | Fold    Term Term Term
           | Case    Term Identifier Identifier Term
           | Apply   Term Term
-          | Comp    Term Term 
+          | Comp    Term Term
+          | Hole
+          | Closure Env Term
 
 data BinOp = Add | Mult | Dot
 
@@ -61,28 +66,28 @@ let_ :: Identifier -> (Term, Type) -> (Term, Type) -> Term
 let_ x (v, t1) (b, t2) = Fun t1 t2 x b $$ v
 
 -- | Type Sugar
-real :: Type 
+real :: Type
 real = TReal
 
-int :: Type 
-int = TInt 
+int :: Type
+int = TInt
 
 array :: Type -> Type
 array = TArray
 
--- | Term Sugar 
-var :: Identifier -> Term 
-var = Var 
+-- | Term Sugar
+var :: Identifier -> Term
+var = Var
 
-fun :: [(Identifier, Type)] -> (Term, Type) -> Term 
+fun :: [(Identifier, Type)] -> (Term, Type) -> Term
 fun [] (b, _)              = b
 fun ((x, t1) : []) (b, t2) = Fun t1 t2 x b
 fun ((x, t1) : xs) (b, t2) = Fun t1 (TFun t3 t4) x f
-  where 
+  where
     f@(Fun t3 t4 _ _) = fun xs (b, t2)
 
-sigmoid :: Term -> Term 
-sigmoid = Sigmoid 
+sigmoid :: Term -> Term
+sigmoid = Sigmoid
 
 dot :: Term -> Term -> Term
 dot = BinOp Dot Nothing
@@ -91,28 +96,28 @@ dot = BinOp Dot Nothing
 t $^ n = product (replicate n t)
 
 new :: Type -> Term -> Term
-new = New 
+new = New
 
-length_ :: Term -> Term 
-length_ = Length 
+length_ :: Term -> Term
+length_ = Length
 
 lookup_ :: Term -> Term -> Term
-lookup_ = Lookup 
+lookup_ = Lookup
 
-update :: Term -> Term -> Term -> Term 
-update = Update 
+update :: Term -> Term -> Term -> Term
+update = Update
 
-map_ :: Term -> Term -> Term 
-map_ = Map 
+map_ :: Term -> Term -> Term
+map_ = Map
 
-fold :: Term -> Term -> Term -> Term 
+fold :: Term -> Term -> Term -> Term
 fold = Fold
 
-zipwith :: Term -> Term -> Term -> Term 
+zipwith :: Term -> Term -> Term -> Term
 zipwith = ZipWith
 
-case_ :: Term -> Identifier -> Identifier -> Term -> Term 
-case_ = Case 
+case_ :: Term -> Identifier -> Identifier -> Term -> Term
+case_ = Case
 
 ($$) :: Term -> Term -> Term
 ($$) = Apply
@@ -121,7 +126,7 @@ case_ = Case
 ($.) = Comp
 
 fst_ :: Type -> Type -> Term
-fst_ tau1 tau2 = fun [("x", tau1 $* tau2)] (case_ (var "x") "y" "z" $ var "y", tau1) 
+fst_ tau1 tau2 = fun [("x", tau1 $* tau2)] (case_ (var "x") "y" "z" $ var "y", tau1)
 
 snd_ :: Type -> Type -> Term
 snd_ tau1 tau2 = fun [("x", tau1 $* tau2)] (case_ (var "x") "y" "z" $ var "z", tau2)
