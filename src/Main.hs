@@ -9,6 +9,8 @@ import AbstractMachine
 import Annotate
 import Test
 
+import qualified Data.Vector as V
+
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
 
@@ -54,6 +56,9 @@ exampleSnd = fun [("pair", TPair realpair realpair)] ( case_ (var "pair") "id1" 
 examplePoly :: Term
 examplePoly = fun [("x", real)] ( (3 * (var "x" * var "x" * var "x")) + var "x" * 9 ,real)
 
+examplePolyMultiVar :: Term
+examplePolyMultiVar = fun [("x", real), ("y", real), ("z", real)] (var "x" * var "y" * var "z" + 2 * var "x" * var "x" * var "y" + var "z" * var "z" * var "z", real)
+
 exampleLogReg :: Term
 exampleLogReg = fun [("x", array real), ("w", array real), ("b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
 
@@ -93,3 +98,26 @@ exampleElementWise = exampleMap + exampleMap
 
 exampleElementWise2 :: Term 
 exampleElementWise2 = 1 - (exampleMap * 0.01)
+
+exampleArray1a :: Term
+exampleArray1a = map_ (addC real $$ 0.1) (new real (CInt 10))
+exampleArray1b :: Term
+exampleArray1b = update (new real (CInt 10)) (CInt 1) 1
+exampleArray1 :: Term
+exampleArray1 = zipwith (pairC real real) exampleArray1a exampleArray1b
+
+exampleArray2 :: Term
+exampleArray2 = zipwith (pairC real real) (update (exampleArray1a + exampleArray1a) (CInt 1) (-1)) (new real (CInt 10))
+
+
+addC :: Type -> Term
+addC t = fun [("x", t), ("y", t)] (var "x" + var "y", t)
+
+pairC :: Type -> Type -> Term
+pairC t1 t2 =  fun [("x", t1), ("y", t2)] (var "x" $* var "y", t1 $* t2)
+
+--layer :: Int -> Term
+--layer n = fun [("f", TFun ($* array real)
+
+exampleVectorField :: Term
+exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)
