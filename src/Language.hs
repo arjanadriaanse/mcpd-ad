@@ -50,7 +50,7 @@ instance Num Term where
   signum (CReal n) = CReal (signum n)
   signum _      = error "Not supported"
   fromInteger   = CReal . fromInteger
-  negate n      = CReal (-1) * n
+  negate n      = (-1) * n
 
 instance Fractional Term where
   fromRational = CReal . fromRational
@@ -88,7 +88,7 @@ dot :: Term -> Term -> Term
 dot = BinOp Dot Nothing
 
 ($^) :: Term -> Int -> Term
-t $^ n = foldl (*) 1 (replicate n t)
+t $^ n = product (replicate n t)
 
 new :: Type -> Term -> Term
 new = New 
