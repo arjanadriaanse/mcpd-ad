@@ -57,7 +57,7 @@ examplePoly :: Term
 examplePoly = fun [("x", real)] ( (3 * (var "x" * var "x" * var "x")) + var "x" * 9 ,real)
 
 examplePolyMultiVar :: Term
-examplePolyMultiVar = fun [("x", real), ("y", real), ("z", real)] (var "x" * var "y" * var "z" + 2 * var "x" * var "x" * var "y" + var "z" * var "z" * var "z", real)
+examplePolyMultiVar = fun [("x", real), ("y", real), ("z", real)] (var "x" * var "y" * var "z" + 2 * (var "x" $^ 2) * var "y" + (var "z" $^ 3), real)
 
 exampleLogReg :: Term
 exampleLogReg = fun [("x", array real), ("w", array real), ("b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
@@ -119,6 +119,11 @@ pairC t1 t2 =  fun [("x", t1), ("y", t2)] (var "x" $* var "y", t1 $* t2)
 layer :: Int -> Term
 layer n = fun [("f", TFun (array real) (TFun (array real) (TFun real real))), ("ws", array (array real)), ("bs", array real), ("x", array real)] (CArray real (V.fromList $ map g [0 .. n-1]), array real)
   where g i = var "f" $$ var "x" $$ lookup_ (var "ws") (CInt i) $$ lookup_ (var "bs") (CInt i)
+
+neuralnet1 :: Term
+neuralnet1 = fun [("x", array real), ("ws1", array (array real)), ("bs1", array real), ("ws2", array (array real)), ("bs2", array real), ("ws3", array (array real)), ("bs3", array real)]
+                 (((layer 1 $$ f $$ var "ws3" $$ var "bs3") $. (layer 4 $$ f $$ var "ws2" $$ var "bs2") $. (layer 3 $$ f $$ var "ws1" $$ var "bs1")) $$ var "x", array real)
+  where f = exampleLogReg
 
 exampleVectorField :: Term
 exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)

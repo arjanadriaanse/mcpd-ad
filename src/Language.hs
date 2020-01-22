@@ -87,6 +87,9 @@ sigmoid = Sigmoid
 dot :: Term -> Term -> Term
 dot = BinOp Dot Nothing
 
+($^) :: Term -> Int -> Term
+t $^ n = foldl (*) 1 (replicate n t)
+
 new :: Type -> Term -> Term
 new = New 
 
