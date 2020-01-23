@@ -67,5 +67,9 @@ finiteDifferences examplePolyMultiVar [3 $* 1, 4 $* 0, 5 $* 0]
 exampleLogReg
 d = differentiate . annotate $ exampleLogReg
 d
+exampleArray1
+exampleArray2
+evaluate $ d $$ exampleArray1 $$ exampleArray2 $$ (0.5 $* 0) 
+finiteDifferences exampleLogReg [exampleArray1, exampleArray2, 0.5 $* 0]
 
 -}
