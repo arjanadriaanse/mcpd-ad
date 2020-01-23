@@ -50,7 +50,7 @@ instance Num Term where
   signum (CReal n) = CReal (signum n)
   signum _      = error "Not supported"
   fromInteger   = CReal . fromInteger
-  negate n      = (-1) * n
+  negate n      = CReal (-1) * n
 
 instance Fractional Term where
   fromRational = CReal . fromRational
