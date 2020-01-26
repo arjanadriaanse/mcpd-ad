@@ -36,6 +36,7 @@ transition (MachineState ModeReturn (Left (Pair t1 Hole) : s) env t2) = MachineS
 
 -- Function
 transition (MachineState ModeEval s env f@(Fun _ _ _ _)) = MachineState ModeReturn s env (Closure env f)
+transition (MachineState ModeEval s env f@(Closure _ _)) = MachineState ModeReturn s env f
 
 -- Sigmoid
 transition (MachineState ModeEval s env (Sigmoid t)) = MachineState ModeEval (Left (Sigmoid Hole) : s) env t
