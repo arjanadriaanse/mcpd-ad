@@ -54,7 +54,7 @@ instance Num Term where
 
 instance Fractional Term where
   fromRational = CReal . fromRational
-  (/)          = error "Not supported YET" -- TODO
+  (/)          = error "Division is not supported" 
 
 -- | Misc. Sugar
 let_ :: Identifier -> (Term, Type) -> (Term, Type) -> Term

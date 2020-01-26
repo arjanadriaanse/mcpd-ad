@@ -130,3 +130,8 @@ neuralnet1 = fun [("x", array real), ("ws1", array (array real)), ("bs1", array 
 
 exampleVectorField :: Term
 exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)
+
+
+-- | Structural examples of every kind of expression in our language
+
+-- lookup example, length example, the rest is 

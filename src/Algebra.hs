@@ -66,5 +66,5 @@ foldTerm (fVar, fCReal, fCInt, fCArray, fPair, fFun, fSigmoid, fBinOp,
     fTerm (Case t1 x1 x2 t2) = fCase (fTerm t1) x1 x2 (fTerm t2)
     fTerm (Apply t1 t2)      = fApply (fTerm t1) (fTerm t2)
     fTerm (Comp f1 f2)       = fComp (fTerm f1) (fTerm f2)
-    -- Algebra
+    -- Algebra for types
     fType                = foldType aType
