@@ -2,8 +2,6 @@ module Language where
 import qualified Data.Vector as V
 import qualified Data.Map.Strict as M
 
-type Env = M.Map String Term
-
 data Type = TReal
           | TInt
           | TArray Type
@@ -12,6 +10,7 @@ data Type = TReal
           deriving (Eq, Ord)
 
 type Identifier = String
+type Env = M.Map Identifier Term
 
 data Term = Var     Identifier
           | CReal   Double

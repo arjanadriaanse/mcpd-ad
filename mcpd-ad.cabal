@@ -24,6 +24,7 @@ executable mcpd-ad
                        Variable,
                        Forward,
                        AbstractMachine,
+                       AbstractMachine2,
                        StaticCheck,
                        Annotate,
                        Test

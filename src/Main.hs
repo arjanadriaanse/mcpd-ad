@@ -6,6 +6,7 @@ import PrettyPrint
 import StaticCheck
 import Variable
 import AbstractMachine
+import qualified AbstractMachine2 as A2
 import Annotate
 import Test
 

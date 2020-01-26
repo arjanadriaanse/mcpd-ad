@@ -11,7 +11,6 @@ import qualified Data.Vector as V
 import Data.Function (on)
 import PrettyPrint
 
-type Env = M.Map Identifier Term
 data MachineState = MachineState Env (State MachineState Term)
 
 
