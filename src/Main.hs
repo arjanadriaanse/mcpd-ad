@@ -9,6 +9,7 @@ import AbstractMachine
 import Annotate
 import Test
 
+import qualified Data.Map as M
 import qualified Data.Vector as V
 
 main :: IO ()
@@ -134,4 +135,12 @@ exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x
 
 -- | Structural examples of every kind of expression in our language
 
--- lookup example, length example, the rest is 
+-- lookup example, length example, the rest is inc. 
+exampleStructurePreservingArrays :: Term 
+exampleStructurePreservingArrays = update array (CInt 4) 5.5
+    where 
+        array = new TReal (CInt 10)
+
+exampleIntArray :: Term 
+exampleIntArray = update array (CInt 0) (length_ array) where 
+    array = CArray int (V.fromList [0,1,2,3,4,5,10])
