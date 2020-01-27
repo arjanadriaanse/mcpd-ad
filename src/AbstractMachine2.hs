@@ -13,6 +13,10 @@ data Mode = ModeEval | ModeReturn
 
 data MachineState = MachineState Mode Stack Env Term
 
+getRetTypeFun :: Term -> Type
+getRetTypeFun (Closure _ (Fun _ (TFun _ t) _ _)) = t
+getRetTypeFun (Closure _ (Fun _ t _ _))          = t
+
 evaluate :: Env -> Term -> Term
 evaluate env t = case transition' (MachineState ModeEval [] env t) of
                    MachineState ModeReturn [] _ t' -> t'
@@ -86,11 +90,11 @@ transition (MachineState ModeReturn (Left (Update t Hole v) : s) env i) = Machin
 transition (MachineState ModeReturn (Left (Update (CArray t va) (CInt i) Hole) : s) env v) = MachineState ModeReturn s env (CArray t (va V.// [(i, v)]))
 transition (MachineState ModeEval s env (Map f t)) = MachineState ModeEval (Left (Map Hole t) : s) env f
 transition (MachineState ModeReturn (Left (Map Hole t) : s) env f) = MachineState ModeEval (Left (Map f Hole) : s) env t
-transition (MachineState ModeReturn (Left (Map f Hole) : s) env (CArray t v)) = MachineState ModeEval s env (CArray t (V.map (f $$) v))
+transition (MachineState ModeReturn (Left (Map f Hole) : s) env (CArray t v)) = MachineState ModeEval s env (CArray (getRetTypeFun f) (V.map (f $$) v))
 transition (MachineState ModeEval s env (ZipWith f t1 t2)) = MachineState ModeEval (Left (ZipWith Hole t1 t2) : s) env f
 transition (MachineState ModeReturn (Left (ZipWith Hole t1 t2) : s) env f) = MachineState ModeEval (Left (ZipWith f Hole t2) : s) env t1
 transition (MachineState ModeReturn (Left (ZipWith f Hole t2) : s) env t1) = MachineState ModeEval (Left (ZipWith f t1 Hole) : s) env t2
-transition (MachineState ModeReturn (Left (ZipWith f (CArray t v1) Hole) : s) env (CArray _ v2)) = MachineState ModeEval s env (CArray t (V.zipWith (\x y -> f $$ x $$ y) v1 v2))
+transition (MachineState ModeReturn (Left (ZipWith f (CArray t v1) Hole) : s) env (CArray _ v2)) = MachineState ModeEval s env (CArray (getRetTypeFun f) (V.zipWith (\x y -> f $$ x $$ y) v1 v2))
 transition (MachineState ModeEval s env (Fold f v t)) = MachineState ModeEval (Left (Fold Hole v t) : s) env f
 transition (MachineState ModeReturn (Left (Fold Hole v t) : s) env f) = MachineState ModeEval (Left (Fold f Hole t) : s) env v
 transition (MachineState ModeReturn (Left (Fold f Hole t) : s) env v) = MachineState ModeEval (Left (Fold f v Hole) : s) env t
