@@ -1,5 +1,4 @@
--- The abstract machine v2
-module AbstractMachine2 where
+module StackMachine where
 
 import Language
 import PrettyPrint

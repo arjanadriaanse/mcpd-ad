@@ -1,7 +1,7 @@
 module Test where
 
 import Language
-import qualified AbstractMachine2 as A2
+import qualified StackMachine as A2
 import PrettyPrint
 
 import qualified Data.Vector as V

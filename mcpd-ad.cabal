@@ -23,8 +23,8 @@ executable mcpd-ad
                        PrettyPrint,
                        Variable,
                        Forward,
-                       AbstractMachine,
-                       AbstractMachine2,
+                       FoldMachine,
+                       StackMachine,
                        StaticCheck,
                        Annotate,
                        Test
