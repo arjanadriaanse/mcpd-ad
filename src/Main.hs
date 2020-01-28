@@ -5,9 +5,10 @@ import Forward
 import PrettyPrint
 import StaticCheck
 import Variable
-import AbstractMachine
+import FoldMachine
+import qualified StackMachine as A2
 import Annotate
-import Test
+import Test hiding (evaluate)
 
 import qualified Data.Map as M
 import qualified Data.Vector as V
@@ -132,6 +133,61 @@ neuralnet1 = fun [("x", array real), ("ws1", array (array real)), ("bs1", array 
 exampleVectorField :: Term
 exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)
 
+
+exampleInput :: Term
+exampleInput = exampleArray1a
+
+exampleInputad :: Term
+exampleInputad = zipwith (pairC real real) exampleInput (new real (length_ exampleInput))
+
+exampleWeights1 :: Term
+exampleWeights1 = CArray (array real) (V.fromList [exampleArray1a, exampleArray1a, exampleArray1a])
+
+exampleWeights1ad :: Term
+exampleWeights1ad = CArray (array (real $* real)) (V.fromList [exampleInputad, exampleInputad, exampleInputad])
+
+
+exampleOffset1 :: Term
+exampleOffset1 = CArray real (V.fromList [0.3, 0.1, 0.2])
+
+exampleOffset1ad :: Term
+exampleOffset1ad = zipwith (pairC real real) exampleOffset1 (CArray real (V.fromList [0, 1, 0]))
+
+exampleWeights2a :: Term
+exampleWeights2a = CArray real (V.fromList [0.2, 0.1, 0.6])
+
+exampleWeights2aa :: Term
+exampleWeights2aa = zipwith (pairC real real) exampleWeights2a (new real (length_ exampleWeights2a))
+
+exampleWeights2 :: Term
+exampleWeights2 = CArray (array real) (V.fromList [exampleWeights2a, exampleWeights2a, exampleWeights2a, exampleWeights2a])    
+
+exampleWeights2ad :: Term
+exampleWeights2ad = CArray (array (real $* real)) (V.fromList [exampleWeights2aa, exampleWeights2aa, exampleWeights2aa, exampleWeights2aa]) 
+
+exampleOffset2 :: Term
+exampleOffset2 = CArray real (V.fromList [0.2, 0.1, 0.5, 0.1])
+
+exampleOffset2ad :: Term
+exampleOffset2ad = zipwith (pairC real real) exampleOffset2 (new real (length_ exampleOffset2))
+
+exampleWeights3a :: Term
+exampleWeights3a = CArray real (V.fromList [0.7, 0.1, 0.6, 0.2])
+
+exampleWeights3aa :: Term
+exampleWeights3aa = zipwith (pairC real real) exampleWeights3a (new real (length_ exampleWeights3a))
+
+exampleWeights3 :: Term
+exampleWeights3 = CArray (array real) (V.fromList [exampleWeights3a])
+
+exampleWeights3ad :: Term
+exampleWeights3ad = CArray (array (real $* real)) (V.fromList [exampleWeights3aa])
+
+exampleOffset3 :: Term
+exampleOffset3 = CArray real (V.fromList [0.1])
+
+exampleOffset3ad :: Term
+exampleOffset3ad = zipwith (pairC real real) exampleOffset3 (new real (length_ exampleOffset3))
 
 -- | Structural examples of every kind of expression in our language
 

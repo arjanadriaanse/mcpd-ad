@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-module AbstractMachine where
+module FoldMachine where
 import Language 
 import Algebra
 import qualified Data.Map.Strict as M
@@ -11,7 +11,6 @@ import qualified Data.Vector as V
 import Data.Function (on)
 import PrettyPrint
 
-type Env = M.Map Identifier Term
 data MachineState = MachineState Env (State MachineState Term)
 
 

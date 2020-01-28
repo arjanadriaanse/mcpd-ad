@@ -1,6 +1,6 @@
 module StaticCheck where
 
-import Language
+import Language hiding (Env)
 import PrettyPrint -- TODO: REMOVE AFTER ADDING SHOW INSTANCE FOR TYPEERROR
 
 import qualified Data.Map.Strict as M

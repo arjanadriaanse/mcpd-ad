@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 module Annotate where
-import Language 
+import Language hiding (Env) 
 import Algebra
 import qualified Data.Map.Strict as M
 import Control.Monad.State.Strict
