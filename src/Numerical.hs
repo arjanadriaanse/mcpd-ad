@@ -1,4 +1,4 @@
-module Test where
+module Numerical where
 
 import Language
 import qualified StackMachine as A2

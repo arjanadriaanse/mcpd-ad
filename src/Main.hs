@@ -8,26 +8,41 @@ import Variable
 import FoldMachine
 import qualified StackMachine as A2
 import Annotate
-import Test hiding (evaluate)
+import Numerical hiding (evaluate)
 
 import qualified Data.Map as M
 import qualified Data.Vector as V
 
-main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main :: IO()
+main = putStrLn "Run differentiateWrapper on anything!"
 
-example :: Term
-example = df $$ (10 $* 1)
-    where
-        df = differentiate $ fun [("y", real)] (var "y" * var "y" + var "y", real)
+-- | Examples calling with 0 or more arguments
+callDiffWrapper  = differentiateWrapper examplePolyMultiVar  [(5 $* 1), (8 $* 0), (1000 $* 0)] 
+callDiffWrapper2 = differentiateWrapper exampleDot []
+callDiffWrapper3 = differentiateWrapper exampleComp [4 $* 1]
+callDiffWrapper4 = differentiateWrapper exampleLogReg [exampleArray1, exampleArray2, 0.5 $* 0 ]
 
-exampleNest :: Term
-exampleNest = fun [("y", real)] (f $$ 20, real) $$ 8000
-    where
-        f = fun [("y", real)] (var "y" + var "y", real)
+-- | Takes a function, and a list of tuples which are the functions arguments 
+-- | Applies derivative of exp to all inputs xs 
+differentiateWrapper :: Term -> [Term] -> IO ()
+differentiateWrapper exp xs = do
+    putStrLn ("--------------------------------")
+    putStrLn ("Evaluating " ++ show exp)
+    putStrLn ("Arguments: " ++ show xs)
+    putStrLn ("-----Derivative expression------")
+    putStrLn $ show diff
+    putStrLn ("-----Evaluating...--------------")
+    putStrLn ("-----Exact derivative-----------")
+    putStrLn $ show result 
+    putStrLn ("-----Approximate derivative-----")
+    putStrLn $ show fd 
+    putStrLn ("--------------------------------") where 
+    result = evaluate (foldl ($$) diff xs)
+    diff   = (differentiate . annotate) exp
+    fd     = finiteDifferences exp xs
 
-exampleFst :: Term
-exampleFst = fun [("x", TPair real real)] ( case_ (var "x") "id1" "id2" (var "id1") , real) $$ (Pair 10 20)
+examplePoly1 :: Term
+examplePoly1 = fun [("y", real)] (var "y" * var "y" + var "y", real)
 
 exampleMap :: Term
 exampleMap = map_ (fun [("x", real)] (var "x" + 20, real)) (new real (CInt 10))
@@ -43,15 +58,22 @@ examplef = fold f 0 exampleMap where
     f = fun [("b", real), ("x", real)] (var "x" + var "b", real)
 
 exampleNested :: Term
-exampleNested = f $$ 10 $$ 5 $$ 3
-    where
-        f = fun [("x", real),("y", real), ("z", real)] (var "x" * (var "y" + var "z"), real)
+exampleNested = fun [("x", real),("y", real), ("z", real)] (var "x" * (var "y" + var "z"), real)
 
--- 9x + 3x^3
--- 9  + 9x^2
--- 18x
+exampleStructurePreservingArrays :: Term 
+exampleStructurePreservingArrays = update array (CInt 4) 5.5
+    where 
+        array = new TReal (CInt 10)
+
+exampleIntArray :: Term 
+exampleIntArray = update array (CInt 0) (length_ array) where 
+    array = CArray int (V.fromList [0,1,2,3,4,5,10])
 
 realpair = real $* real
+
+exampleFst :: Term
+exampleFst = fun [("x", realpair)] ( case_ (var "x") "id1" "id2" (var "id1") , real) 
+
 exampleSnd :: Term
 exampleSnd = fun [("pair", TPair realpair realpair)] ( case_ (var "pair") "id1" "id2" (var "id2") , realpair)
 
@@ -66,8 +88,6 @@ examplePolyMultiVar = fun [("x", real), ("y", real), ("z", real)] (var "x" * var
 
 exampleLogReg :: Term
 exampleLogReg = fun [("x", array real), ("w", array real), ("b", real)] (sigmoid (var "x" `dot` var "w" + var "b"), real)
-
--- | How to do function composition without polymorphism?
 
 exampleSecondDerivative :: Term
 exampleSecondDerivative =  (fun [("x", realpair)] (exampleSnd $$ ((differentiate examplePoly) $$ (var "x")), real)) -- ?? How to do it
@@ -86,17 +106,8 @@ exampleZip = zipwith f exampleMap exampleMap where
 exampleComp :: Term
 exampleComp = comp where
     comp = f1 $. f2
-f1 = fun [("x", real)] (var "x" + 9, real )
-f2 = fun [("y", real)] (var "y" * 2, real )
-
-exampleCompFromMain = comptesting f1 f2
-
-comptesting :: Term -> Term -> Term
-comptesting func2 func1 = case (func1, func2) of
-          ((Fun tf11 tf12 id1 body1), (Fun tf21 tf22 id2 body2)) -> result where
-              result = Fun tf11 tf22 id1 body
-              body   = let_ id2 (body1, tf12) (body2, tf22)
-
+    f1 = fun [("x", real)] (var "x" + 9, real )
+    f2 = fun [("y", real)] (var "y" * 2, real )
 
 exampleElementWise :: Term
 exampleElementWise = exampleMap + exampleMap
@@ -113,7 +124,6 @@ exampleArray1 = zipwith (pairC real real) exampleArray1a exampleArray1b
 
 exampleArray2 :: Term
 exampleArray2 = zipwith (pairC real real) (update (exampleArray1a + exampleArray1a) (CInt 1) (-1)) (new real (CInt 10))
-
 
 addC :: Type -> Term
 addC t = fun [("x", t), ("y", t)] (var "x" + var "y", t)
@@ -133,7 +143,6 @@ neuralnet1 = fun [("x", array real), ("ws1", array (array real)), ("bs1", array 
 exampleVectorField :: Term
 exampleVectorField = fun [("x", real)] (CArray real (V.fromList [var "x", var "x" * var "x", var "x" * var "x" * var "x"]), array real)
 
-
 exampleInput :: Term
 exampleInput = exampleArray1a
 
@@ -145,7 +154,6 @@ exampleWeights1 = CArray (array real) (V.fromList [exampleArray1a, exampleArray1
 
 exampleWeights1ad :: Term
 exampleWeights1ad = CArray (array (real $* real)) (V.fromList [exampleInputad, exampleInputad, exampleInputad])
-
 
 exampleOffset1 :: Term
 exampleOffset1 = CArray real (V.fromList [0.3, 0.1, 0.2])
@@ -189,14 +197,4 @@ exampleOffset3 = CArray real (V.fromList [0.1])
 exampleOffset3ad :: Term
 exampleOffset3ad = zipwith (pairC real real) exampleOffset3 (new real (length_ exampleOffset3))
 
--- | Structural examples of every kind of expression in our language
 
--- lookup example, length example, the rest is inc. 
-exampleStructurePreservingArrays :: Term 
-exampleStructurePreservingArrays = update array (CInt 4) 5.5
-    where 
-        array = new TReal (CInt 10)
-
-exampleIntArray :: Term 
-exampleIntArray = update array (CInt 0) (length_ array) where 
-    array = CArray int (V.fromList [0,1,2,3,4,5,10])
