@@ -74,9 +74,10 @@ transition (MachineState ModeReturn (Left (BinOp o _ (CArray t v1) Hole) : s) en
 transition (MachineState ModeEval s env (New t tl)) = MachineState ModeEval (Left (New t Hole) : s) env tl
 transition (MachineState ModeReturn (Left (New t Hole) : s) env (CInt vl)) =
   let vr = case t of
-             TReal -> CArray TReal (V.replicate vl (CReal 0))
-             TInt  -> CArray TInt  (V.replicate vl (CInt 0))
-             _     -> error $ "Cannot create new array of type: " ++ show t
+             TReal             -> CArray TReal (V.replicate vl (CReal 0))
+             TInt              -> CArray TInt  (V.replicate vl (CInt 0))
+             TPair TReal TReal -> CArray (TPair TReal TReal) (V.replicate vl (Pair (CReal 0) (CReal 0)))
+             _                 -> error $ "Cannot create new array of type: " ++ show t
   in MachineState ModeReturn s env vr
 transition (MachineState ModeEval s env (Length t)) = MachineState ModeEval (Left (Length Hole) : s) env t
 transition (MachineState ModeReturn (Left (Length Hole) : s) env (CArray _ v)) = MachineState ModeReturn s env (CInt (V.length v))

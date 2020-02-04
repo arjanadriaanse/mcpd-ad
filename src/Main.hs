@@ -27,17 +27,29 @@ callDiffWrapper4 = differentiateWrapper exampleLogReg [exampleArray1, exampleArr
 differentiateWrapper :: Term -> [Term] -> IO ()
 differentiateWrapper exp xs = do
     putStrLn ("--------------------------------")
-    putStrLn ("Evaluating " ++ show exp)
-    putStrLn ("Arguments: " ++ show xs)
-    putStrLn ("-----Derivative expression------")
-    putStrLn $ show diff
-    putStrLn ("-----Evaluating...--------------")
-    putStrLn ("-----Exact derivative-----------")
-    putStrLn $ show result 
-    putStrLn ("-----Approximate derivative-----")
-    putStrLn $ show fd 
-    putStrLn ("--------------------------------") where 
-    result = evaluate (foldl ($$) diff xs)
+    putStrLn ("Performing initial typecheck")
+    case typecheck M.empty exp of
+      Left e  -> putStrLn ("Error: " ++ show e)
+      Right _ -> do
+        putStrLn ("Ok")
+        putStrLn ("--------------------------------")
+        putStrLn ("Evaluating " ++ show exp)
+        putStrLn ("Arguments: " ++ show xs)
+        putStrLn ("-----Derivative expression------")
+        putStrLn $ show diff
+        putStrLn ("-----Evaluating...--------------")
+        case typecheck M.empty exp' of
+          Left e  -> putStrLn ("Error: " ++ show e)
+          Right _ -> do
+            putStrLn ("Second typecheck OK")
+            putStrLn ("-----Exact derivative-----------")
+            putStrLn $ show result 
+            putStrLn ("-----Approximate derivative-----")
+            putStrLn $ show fd 
+            putStrLn ("--------------------------------")
+  where 
+    exp'   = foldl ($$) diff xs
+    result = A2.evaluate M.empty exp'
     diff   = (differentiate . annotate) exp
     fd     = finiteDifferences exp xs
 
