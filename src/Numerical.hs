@@ -1,8 +1,10 @@
 module Numerical where
 
+import Algebra
 import Language
 import qualified StackMachine as A2
 import PrettyPrint
+import StaticCheck
 
 import qualified Data.Vector as V
 import qualified Data.Map.Strict as M
@@ -21,19 +23,22 @@ finiteDifferences t is = case (evaluate value, evaluate valuePlus) of
 
                            _                   -> error $ "Unexpected term value: " ++ show (value, valuePlus)
   where value = foldl f t is
-        dropPair t = case t of
-          TPair TReal TReal -> TReal
-          TArray t'         -> TArray (dropPair t')
-          _                 -> error $ "Error in dropPair: " ++ show t
-        addMap t x = case t of
-          TPair TReal TReal -> x
-          TArray t'         -> (fun [("f", TFun t' (dropPair t')), ("x", array t')] (map_ (var "f") (var "x"), array (dropPair t'))) $$ addMap t' x
-          _                 -> error $ "Error in addMap: " ++ show t
-        f x y = x $$ case evaluate y of
-          Pair _ _ -> fst_ real real $$ y
-          CArray t _ -> (addMap t (fun [("x", array (real $* real))] (map_ (fst_ real real) (var "x"), array real))) $$ y
+        f x y = x $$ argProcess (fst_ real real) y
 
         valuePlus = foldl g t is
-        g x y = x $$ case evaluate y of
-          Pair _ _ -> case_ y "x" "y" (var "x" + var "y" * CReal delta)
-          CArray t _ -> (addMap t (fun [("x", array (real $* real))] (map_ (fun [("p", real $* real)] (case_ (var "p") "x" "y" (var "x" + var "y" * CReal delta), real)) (var "x"), array real))) $$ y
+        g x y = x $$ argProcess (fun [("z", real $* real)] (case_ (var "z") "x" "y" (var "x" + var "y" * CReal delta), real)) y
+
+dropPair :: Type -> Type
+dropPair = foldType (TReal, TInt, TArray, fPair, TFun)
+  where fPair TReal TReal = TReal
+        fPair t1    t2    = TPair t1 t2
+
+argProcess :: Term -> Term -> Term
+argProcess t' t = case typecheck M.empty t of
+  Right (TPair TReal TReal) -> t' $$ t
+  Right (TPair _     _)     -> case evaluate t of
+                                 ~(Pair t1 t2) -> Pair (argProcess t' t1) (argProcess t' t2)
+  Right TInt                -> t
+  Right (TArray _)          -> case evaluate t of
+                                 ~(CArray tau ts) -> CArray (dropPair tau) (V.map (argProcess t') ts)
+  _                         -> error "Don't know how to handle this"
